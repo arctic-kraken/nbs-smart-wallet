@@ -4,8 +4,8 @@ A webapp written in .NET Core to manage your Revolut transactions.
 # Project Idea for EPA
 
 .NET Core Web Application
-CSS Tailwind for styles
-Chart.js for charts
+CSS Tailwind for styles - https://www.tailwindcss.com
+Chart.js for charts - https://www.chartjs.org/docs/latest
 
 Idea is an budgeting app for personal/business
 
