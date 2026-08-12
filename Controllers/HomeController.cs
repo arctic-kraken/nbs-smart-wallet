@@ -6,6 +6,8 @@ namespace nbs_smart_wallet.Controllers;
 
 public class HomeController : Controller
 {
+
+
     public IActionResult Index()
     {
         return View();
@@ -21,4 +23,11 @@ public class HomeController : Controller
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
+
+
+    //public Task<ActionResult> Auth()
+    //{
+
+    //    return Ok();
+    //}
 }
