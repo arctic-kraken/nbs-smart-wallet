@@ -10,12 +10,11 @@ namespace nbs_smart_wallet.Services
 	{
 		public const string sandbox_url = "https://sandbox-oba-auth.revolut.com";
 		public const string sandbox_client_id = "2e62762a-c15b-4aa9-9278-18c280797854";
-		private readonly IHttpClientFactory _clientFactory;
 		private HttpClient _client;
+		private string client_credential_access_token = string.Empty;
 		public RevolutProxy(IHttpClientFactory clientFactory)
 		{
-			_clientFactory = clientFactory;
-			_client = _clientFactory.CreateClient("revolut");
+			_client = clientFactory.CreateClient("revolut");
 			_client.BaseAddress = new Uri(sandbox_url);
 		}
 
@@ -26,7 +25,7 @@ namespace nbs_smart_wallet.Services
 			public int expires_in { get; set; }
 		}
 
-		public async Task<ClientCredentialTokenResponse> GetClientCredentialToken()
+		public async Task<bool> GetClientCredentialToken()
 		{
 			string url = $"/token?grant_type=client_credentials&scope=accounts&client_id={sandbox_client_id}";
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
@@ -34,12 +33,17 @@ namespace nbs_smart_wallet.Services
 			using var response = await _client.SendAsync(request);
 			response.EnsureSuccessStatusCode();
 			string content = await response.Content.ReadAsStringAsync();
+			var credential = JsonConvert.DeserializeObject<ClientCredentialTokenResponse>(content);
+			client_credential_access_token = credential.access_token;
 
-			return JsonConvert.DeserializeObject<ClientCredentialTokenResponse>(content);
+			return true;
 		}
 
-		public async Task<bool> CreateAccountAccessConsent(string client_credential_access_token)
+		public async Task<bool> CreateAccountAccessConsent()
 		{
+			if (String.IsNullOrEmpty(client_credential_access_token))
+				return false;
+
 			string url = $"/account-access-consents";
 
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
@@ -50,7 +54,7 @@ namespace nbs_smart_wallet.Services
 			response.EnsureSuccessStatusCode();
 			string content = await response.Content.ReadAsStringAsync();
 
-
+			// remember to create endpoint for the JWK file (just return the contents instead of hosting file)
 			return false;
 		}
 	}
