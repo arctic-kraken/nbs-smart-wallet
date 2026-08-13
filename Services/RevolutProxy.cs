@@ -1,9 +1,15 @@
 ﻿
 using JsonConverter.Newtonsoft.Json;
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net.Http.Headers;
+using System.Runtime.ConstrainedExecution;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace nbs_smart_wallet.Services
 {
@@ -118,11 +124,11 @@ namespace nbs_smart_wallet.Services
 
 		public class JWTHeader
 		{
-			public string alg { get; set; } = string.Empty;
+			public string alg { get; set; } = "PS256";
 			public string kid { get; set; } = string.Empty;
 		}
 
-		public class JWTBody
+		public class JWTPayload
 		{
 			public string response_type { get; set; } = "code id_token";
 			public string client_id { get; set; } = sandbox_client_id;
@@ -146,6 +152,54 @@ namespace nbs_smart_wallet.Services
 					}
 				}
 			}
+		}
+
+		public string GetSignedJWTFor(Guid consentId)
+		{
+			//string pk = "MIIEejCCAmKgAwIBAgIFAOKNqYUwDQYJKoZIhvcNAQELBQAwYDELMAkGA1UEBhMCVUsxDzANBgNVBAgMBkxvbmRvbjEQMA4GA1UECgwHUmV2b2x1dDEQMA4GA1UECwwHU2FuZGJveDEcMBoGA1UEAwwTc2FuZGJveC5yZXZvbHV0LmNvbTAeFw0yNjA4MTExNTI3MDVaFw0yNzA4MTExNTI3MDVaMIGcMQswCQYDVQQGEwJHQjEUMBIGA1UECgwLdGVzdGNvbXBhbnkxGzAZBgNVBAsMEjAwMTU4MDAwMDEwM1VBdkFBTTEfMB0GA1UEAwwWMmtpWFF5bzB0ZWRqVzJzb21qU2dINzE5MDcGA1UEYQwwUFNEVUstUkVWQ0EtZDE3MzhjODAtZmYwMi00YzkzLWE1MDctNjZlYjNhYjQzOWEzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoL9VFL2g5dcjvB362HohzDhqq2MsT81N8himG/Le1E+BH/sNOQvLlHk5P+kuWk19uFL17wFWenfwX9Fo3wwlK6m6qw/eGYAE4XEv9zVVSh0Z2v8EZ+L795+5Dvvr4PUAXiYlSHFnoREuTB9KA2le1XUI3/Ddrvt0vhQCXpxqAdpJmW6BN4AL7gO3fwq1ekQnatNX98G8vIVMTe8PtvsZ9wFDHBjX5GFjc0EK/4yDVA0UlnQnWhfiRJGp8ZL+O3yDLBWWXsYJClaEj/PGKyPJCGyTw5yYUbyXu9Bhw+zg/g7m3O/Rg5NSdp7bZDxmxbMi6CitIS/SniH31W6d/ddFSQIDAQABMA0GCSqGSIb3DQEBCwUAA4ICAQAxWOoQQLzaBWxnE6Z9zFvzbFrFuURgXuheRiYAtU8gPV3BhdCeylgTf0T2ZOUxLgvloHwXaYvjK1JByREpwX55IubJcBiVvgKHOFz/w21H93pvGYZKDvfWOQzmsaN4SjWxG/S4wHWSEak6ljBc+OYWm/btVVhd/PbzwBkLpSB/K32OccLwQHNl5VDTBG2qBvLeEe9KiHs0fHF+2MJKlyX1lxyI/UgVifVQPkDxrbodr/NGlJft6mYjQQit1oq6z15kiS0EZpW3hV++OBELufF9BGZ214t+5tG6a8vHVodilfVyi4IWRsjxV3Qu5XJaiOqfiJUk2iY0pzvQQGg8SVFBWjEZXBuMgmTipFE1obAGPgqNsXTvnoYnaZBHfzgvGVFGFqxdpdwxQ45ihZfSb8AezcSGm8yfU/DV/xbACN+n71AR84wXt+lpsDuvLTQPjJwb6q782x3mLR24teccKX6zFaEhLrKAxy1ugtC5+P6gRdrlIWgBOuZAAJuOjInozVERAZlRzMw67lswvosBDau8clhonLb3KeR2sOVe0LXprZBeyurdLwO4L1R5t6j5zBhOPHr3415hSVwnWZYeFlyUxm5ggrHCPI7BOvEc0M/+Nly6s7S76bYfr/04TLc6fjuGJRzDiM5m8eEczJByb4ju7GcMkS5JIcOvipoGo4u3uw==";
+			var header = new JWTHeader();
+			header.kid = "pallasathena";
+
+			var payload = new JWTPayload();
+			payload.redirect_uri = "";
+			payload.aud = "https://sandbox-oba-auth.revolut.com";
+			payload.scope = "accounts";
+			//payload.state = "state";
+			payload.nbf = "1";
+			payload.exp = "2";
+			payload.claims.id_token.openbanking_intent_id.value = consentId.ToString();
+
+			var sHeader = JsonConvert.SerializeObject(header) ?? "";
+			var sPayload = JsonConvert.SerializeObject(payload) ?? "";
+
+			var cert = X509Certificate2.CreateFromPemFile(@"C:\Users\JakubKiepas\transport.pem", @"C:\Users\JakubKiepas\private.key");
+			//string jwt = "";
+			//var handler = new JwtSecurityTokenHandler();
+			//var desc = new SecurityTokenDescriptor
+
+
+			//handler.CreateToken();
+			//using (var rsa = cert.GetRSAPrivateKey())
+			//{
+			//	jwt = rsa.Encrypt(System.Text.Encoding.UTF8.GetBytes(Base64UrlEncoder.Encode(sHeader) + "." + Base64UrlEncoder.Encode(sPayload)), RSAEncryptionPadding.OaepSHA256);
+			//}
+			//SecurityAlgorithms.RsaSsaPssSha256.
+			//string jwt = Base64UrlEncoder.Encode(sHeader) + "." + Base64UrlEncoder.Encode(sPayload) + "." + cert.GetRSAPrivateKey().SignData();
+			var pk = cert.GetRSAPrivateKey();
+			if (pk != null)
+			{
+				var jwt_bytes = pk.SignData(Encoding.UTF8.GetBytes(Base64UrlEncoder.Encode(sHeader) + "." + Base64UrlEncoder.Encode(sPayload)), HashAlgorithmName.SHA256, RSASignaturePadding.Pss);
+				//var jwt = Encoding..GetString(jwt_bytes);
+				return jwt;
+			}
+			
+			//cert.GetRSAPrivateKey().
+			//var creds = new SigningCredentials(new RsaSecurityKey(cert.GetRSAPrivateKey()), SecurityAlgorithms.RsaSsaPssSha256);
+			////creds.Kid = consentId.ToString();
+			//var test = new JwtSecurityToken(;
+			
+
+			return string.Empty;
 		}
 
 		

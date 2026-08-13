@@ -3,12 +3,17 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using nbs_smart_wallet.Models;
 using Newtonsoft.Json;
+using nbs_smart_wallet.Services;
 
 namespace nbs_smart_wallet.Controllers;
 
 public class HomeController : Controller
 {
-
+    private RevolutProxy _revolutProxy;
+    public HomeController(RevolutProxy revolutProxy)
+    {
+        _revolutProxy = revolutProxy;
+    }
 
     public IActionResult Index()
     {
@@ -59,6 +64,8 @@ public class HomeController : Controller
         });
         var response = JsonConvert.SerializeObject(jwk);
 
+        _revolutProxy.GetSignedJWTFor(Guid.NewGuid());
+        
         return Ok(response);
     }
 }
