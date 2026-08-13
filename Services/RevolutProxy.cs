@@ -103,7 +103,7 @@ namespace nbs_smart_wallet.Services
 			body.Data.TransactionFromDateTime = DateTime.Now.AddMonths(-3);
 			body.Data.TransactionToDateTime = DateTime.Now;
 
-			request.Content = JsonContent.Create(body)
+			request.Content = JsonContent.Create(body);
 
 			using var response = await _client.SendAsync(request);
 			response.EnsureSuccessStatusCode();
@@ -114,6 +114,38 @@ namespace nbs_smart_wallet.Services
 				throw new ArgumentNullException();
 			
 			return account_access_consent;
+		}
+
+		public class JWTHeader
+		{
+			public string alg { get; set; } = string.Empty;
+			public string kid { get; set; } = string.Empty;
+		}
+
+		public class JWTBody
+		{
+			public string response_type { get; set; } = "code id_token";
+			public string client_id { get; set; } = sandbox_client_id;
+			public string redirect_uri { get; set; } = string.Empty;
+			public string aud = string.Empty;
+			public string scope = string.Empty;
+			public string state = "somestate";
+			public string nbf { get; set; } = string.Empty;
+			public string exp{ get; set; } = string.Empty;
+			public Claims claims { get; set; } = new Claims();
+
+			public class Claims
+			{
+				public Id_token id_token { get; set; } = new Id_token();
+				public class Id_token
+				{
+					public OpenBanking_intent_id openbanking_intent_id = new OpenBanking_intent_id();
+					public class OpenBanking_intent_id
+					{
+						public string value { get; set; } = string.Empty;
+					}
+				}
+			}
 		}
 
 		
