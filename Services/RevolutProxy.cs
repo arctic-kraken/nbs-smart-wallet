@@ -12,6 +12,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Text.Encodings.Web;
 
 namespace nbs_smart_wallet.Services
 {
@@ -161,11 +162,12 @@ namespace nbs_smart_wallet.Services
 
 		public string GetSignedJWTFor(Guid consentId)
 		{
+			var tunnelUrl = Environment.GetEnvironmentVariable("VS_TUNNEL_URL");
 			var header = new JWTHeader();
 			header.kid = "pallasathena";
 
 			var payload = new JWTPayload();
-			payload.redirect_uri = "";
+			payload.redirect_uri = $"{tunnelUrl}/redirect_target";
 			payload.aud = "https://sandbox-oba-auth.revolut.com";
 			payload.scope = "accounts";
 			//payload.state = "state";
@@ -210,6 +212,11 @@ namespace nbs_smart_wallet.Services
 			return jwt;
 		}
 
+		public string GetAuthUrl(Guid consentId)
+		{
+			var coder = UrlEncoder.Create();
+			return $"/ui/index.html?response_type=code%20id_token&scope=accounts&redirect_uri={coder.Encode("")}&client_id={coder.Encode(sandbox_client_id)}&request={coder.Encode(GetSignedJWTFor(consentId))}";
+		}
 		
 	}
 }

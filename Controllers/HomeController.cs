@@ -46,7 +46,7 @@ public class HomeController : Controller
     }
 
     [HttpGet]
-    [Route("/auth")]
+    [Route("/jwk/auth")]
     public ActionResult auth()
     {
         // sandbox credentials
@@ -64,8 +64,18 @@ public class HomeController : Controller
         });
         var response = JsonConvert.SerializeObject(jwk);
 
-        _revolutProxy.GetSignedJWTFor(Guid.NewGuid());
+        //_revolutProxy.GetSignedJWTFor(Guid.NewGuid());
         
         return Ok(response);
+    }
+
+    [HttpGet]
+    [Route("/redirect_target")]
+    public ActionResult redirect_target(string code, string id_token, string state)
+    {
+        // https://example.com/?code=oa_sand_sPoyVs-oMhyR36j5N-ZEVLfK9rQWPNssgIQqsOFZQ-c&id_token=<JWT id_token>&state=example_state
+        Debug.WriteLine($"{code} {id_token} {state}");
+
+		return Ok();
     }
 }
