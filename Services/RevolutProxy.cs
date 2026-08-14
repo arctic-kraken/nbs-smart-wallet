@@ -23,6 +23,9 @@ namespace nbs_smart_wallet.Services
 		private HttpClient _client;
 		private string client_credential_access_token = string.Empty;
 		private string client_credential_refresh_token = string.Empty;
+		private string access_token = string.Empty;
+		private string refresh_token = string.Empty;
+
 		public RevolutProxy(IHttpClientFactory clientFactory)
 		{
 			_client = clientFactory.CreateClient("revolut");
@@ -70,6 +73,7 @@ namespace nbs_smart_wallet.Services
 			public DateTime TransactionFromDateTime { get; set; }
 			public DateTime TransactionToDateTime { get; set; }
 			public Guid ConsentId { get; set; }
+			public List<AppAccount> Account { get; set; } = new List<AppAccount>();
 
 		}
 		public class Risk
@@ -214,8 +218,90 @@ namespace nbs_smart_wallet.Services
 
 		public string GetAuthUrl(Guid consentId)
 		{
+			var tunnelUrl = Environment.GetEnvironmentVariable("VS_TUNNEL_URL");
 			var coder = UrlEncoder.Create();
-			return $"/ui/index.html?response_type=code%20id_token&scope=accounts&redirect_uri={coder.Encode("")}&client_id={coder.Encode(sandbox_client_id)}&request={coder.Encode(GetSignedJWTFor(consentId))}";
+			return $"/ui/index.html?response_type=code%20id_token&scope=accounts&redirect_uri={coder.Encode($"{tunnelUrl}/redirect_target")}&client_id={coder.Encode(sandbox_client_id)}&request={coder.Encode(GetSignedJWTFor(consentId))}";
+		}
+
+		public class AccessTokenResponse
+		{
+			public string access_token { get; set; } = string.Empty;
+			public Guid access_token_id { get; set; }
+			public string token_type { get; set; } = string.Empty;
+			public int expires_in { get; set; }
+			public string refresh_token { get; set; } = string.Empty;
+			public int refresh_token_expires_at { get; set; }
+
+		}
+
+		public async Task<bool> GetAccessToken(string code, string id_token, string state)
+		{
+			var coder = UrlEncoder.Create();
+			string url = $"/token?grant_type=authorization_code&client_id={coder.Encode(sandbox_client_id)}&code={coder.Encode(code)}";
+
+			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
+			request.Content?.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+
+			using var response = await _client.SendAsync(request);
+			response.EnsureSuccessStatusCode();
+			string content = await response.Content.ReadAsStringAsync();
+			// log 
+			var token_response = JsonConvert.DeserializeObject<AccessTokenResponse>(content);
+			if (token_response == null)
+				return false;
+
+			this.access_token = token_response.access_token;
+			this.refresh_token = token_response.refresh_token;
+
+			return true;
+		}
+
+		public class AppAccount
+		{
+			public Guid AccountId { get; set; }
+			public string Currency { get; set; } = string.Empty;
+			public string AccountType { get; set; } = string.Empty;
+			public string AccountSubType { get; set; } = string.Empty;
+			public string Nickname { get; set; } = string.Empty;
+			public List<BankAccount> Account = new List<BankAccount>();
+		}
+
+		public class BankAccount
+		{
+			public string SchemeName { get; set; } = string.Empty;
+			public int Identification { get; set; }
+			public string Name { get; set; } = string.Empty;
+			public string SecondaryIdentification { get; set; } = string.Empty;
+
+		}
+
+		public class AccountResponse
+		{
+			public Data Data { get; set; } = new Data();
+			public Links Links { get; set; } = new Links();
+			public Meta Meta { get; set; } = new Meta();
+		}
+
+		public async Task<List<AppAccount>> GetAccounts()
+		{
+			if (String.IsNullOrEmpty(access_token))
+				throw new InvalidOperationException();
+
+			string url = $"/accounts";
+
+			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
+			request.Headers.Add("x-fapi-financial-id", "001580000103UAvAAM");
+			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+
+			using var response = await _client.SendAsync(request);
+			response.EnsureSuccessStatusCode();
+			string content = await response.Content.ReadAsStringAsync();
+			var accounts = JsonConvert.DeserializeObject<AccountResponse>(content);
+			// log 
+			if (accounts == null)
+				throw new ArgumentNullException();
+
+			return accounts.Data.Account;
 		}
 		
 	}

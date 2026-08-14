@@ -47,7 +47,7 @@ public class HomeController : Controller
 
     [HttpGet]
     [Route("/jwk/auth")]
-    public ActionResult auth()
+    public ActionResult jwk()
     {
         // sandbox credentials
         var jwk = new JWKResponse();
@@ -70,11 +70,24 @@ public class HomeController : Controller
     }
 
     [HttpGet]
+    [Route("/auth")]
+    public async Task<ActionResult> auth()
+    {
+        var client_creds = await _revolutProxy.GetClientCredentialToken();
+        var account_consent = await _revolutProxy.CreateAccountAccessConsent();
+        var url = _revolutProxy.GetAuthUrl(account_consent.Data.ConsentId);
+
+        return Redirect($"{RevolutProxy.sandbox_url}{url}");
+    }
+
+    [HttpGet]
     [Route("/redirect_target")]
     public ActionResult redirect_target(string code, string id_token, string state)
     {
-        // https://example.com/?code=oa_sand_sPoyVs-oMhyR36j5N-ZEVLfK9rQWPNssgIQqsOFZQ-c&id_token=<JWT id_token>&state=example_state
         Debug.WriteLine($"{code} {id_token} {state}");
+        // code is only valid for 2 mins
+        // get access token now
+
 
 		return Ok();
     }
