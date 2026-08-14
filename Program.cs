@@ -13,7 +13,11 @@ builder.Services.AddHttpClient("revolut", c => { })
         var handler = new HttpClientHandler();
         var certificateWithKey = X509Certificate2.CreateFromPemFile(@"C:\Users\JakubKiepas\transport.pem", @"C:\Users\JakubKiepas\private.key");
         handler.ClientCertificates.Add(certificateWithKey);
-        
+
+#if DEBUG
+		handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+#endif
+
 		return handler;
     });
 

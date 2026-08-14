@@ -87,8 +87,16 @@ public class HomeController : Controller
         Debug.WriteLine($"{code} {id_token} {state}");
         // code is only valid for 2 mins
         // get access token now
+        _ = _revolutProxy.GetAccessToken(code, id_token, state);
 
-
-		return Ok();
+		return Ok("oorah!");
     }
+
+	[HttpGet]
+	[Route("/accounts")]
+	public ActionResult Accounts()
+	{
+		var response = _revolutProxy.GetAccounts();
+		return Ok(response);
+	}
 }

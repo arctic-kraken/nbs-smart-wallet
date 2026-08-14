@@ -45,6 +45,7 @@ namespace nbs_smart_wallet.Services
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
 
 			using var response = await _client.SendAsync(request);
+			// The SSL connection could not be established, see inner exception - The credentials supplied to the package were not recognized
 			response.EnsureSuccessStatusCode();
 			string content = await response.Content.ReadAsStringAsync();
 			var credential = JsonConvert.DeserializeObject<ClientCredentialTokenResponse>(content);
