@@ -71,16 +71,18 @@ public class HomeController : Controller
 
     [HttpGet]
     [Route("/auth")]
-    public async Task<ActionResult> auth()
+    public async void auth()
     {
         var client_creds = await _revolutProxy.GetClientCredentialToken();
         var account_consent = await _revolutProxy.CreateAccountAccessConsent();
-        var url = _revolutProxy.GetAuthUrl(account_consent.Data.ConsentId);
+        
+        _revolutProxy.RedirectForAuth(account_consent.Data.ConsentId);
+		// "{\"status\":404,\"message\":\"Endpoint GET /ui/index.html not found\"}"
+		
 
-        return Redirect($"{RevolutProxy.sandbox_url}{url}");
-    }
+	}
 
-    [HttpGet]
+	[HttpGet]
     [Route("/redirect_target")]
     public ActionResult redirect_target(string code, string id_token, string state)
     {

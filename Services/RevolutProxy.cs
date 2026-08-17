@@ -41,11 +41,20 @@ namespace nbs_smart_wallet.Services
 
 		public async Task<bool> GetClientCredentialToken()
 		{
-			string url = $"/token?grant_type=client_credentials&scope=accounts&client_id={sandbox_client_id}";
+			string url = $"/token";
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
+			request.Content?.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+			var form = new Dictionary<string, string> 
+			{
+				{ "grant_type", "client_credentials" },
+				{ "scope", "accounts" },
+				{ "client_id", sandbox_client_id },
+			};
+			var formEncoded = new FormUrlEncodedContent(form);
+			request.Content = formEncoded;
 
 			using var response = await _client.SendAsync(request);
-			// The SSL connection could not be established, see inner exception - The credentials supplied to the package were not recognized
+
 			response.EnsureSuccessStatusCode();
 			string content = await response.Content.ReadAsStringAsync();
 			var credential = JsonConvert.DeserializeObject<ClientCredentialTokenResponse>(content);
@@ -117,7 +126,7 @@ namespace nbs_smart_wallet.Services
 			body.Data.TransactionFromDateTime = DateTime.Now.AddMonths(-3);
 			body.Data.TransactionToDateTime = DateTime.Now;
 
-			request.Content = JsonContent.Create(body);
+			request.Content = JsonContent.Create(body, new MediaTypeHeaderValue("application/json"), System.Text.Json.JsonSerializerOptions.Default);
 
 			using var response = await _client.SendAsync(request);
 			response.EnsureSuccessStatusCode();
@@ -221,7 +230,23 @@ namespace nbs_smart_wallet.Services
 		{
 			var tunnelUrl = Environment.GetEnvironmentVariable("VS_TUNNEL_URL");
 			var coder = UrlEncoder.Create();
-			return $"/ui/index.html?response_type=code%20id_token&scope=accounts&redirect_uri={coder.Encode($"{tunnelUrl}/redirect_target")}&client_id={coder.Encode(sandbox_client_id)}&request={coder.Encode(GetSignedJWTFor(consentId))}";
+			return $"/ui/index.html?response_type=code%20id_token&scope=accounts&redirect_uri={coder.Encode($"{tunnelUrl}/redirect_target")}&client_id={sandbox_client_id}&request={GetSignedJWTFor(consentId)}";
+		}
+
+		public async void RedirectForAuth(Guid consentId)
+		{
+			string url = GetAuthUrl(consentId);
+			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+			request.Headers.Add("x-fapi-financial-id", "001580000103UAvAAM");
+			using var response = await _client.SendAsync(request);
+
+			//response.EnsureSuccessStatusCode();
+			string content = await response.Content.ReadAsStringAsync();
+			//var credential = JsonConvert.DeserializeObject<ClientCredentialTokenResponse>(content);
+			//client_credential_access_token = credential.access_token;
+
+
+			//return OkObjectResult();
 		}
 
 		public class AccessTokenResponse
@@ -238,13 +263,21 @@ namespace nbs_smart_wallet.Services
 		public async Task<bool> GetAccessToken(string code, string id_token, string state)
 		{
 			var coder = UrlEncoder.Create();
-			string url = $"/token?grant_type=authorization_code&client_id={coder.Encode(sandbox_client_id)}&code={coder.Encode(code)}";
+			string url = $"/token";
 
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
 			request.Content?.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+			var form = new Dictionary<string, string>
+			{
+				{ "grant_type", "authorization_code" },
+				{ "code", code },
+				{ "client_id", sandbox_client_id },
+			};
+			var formEncoded = new FormUrlEncodedContent(form);
+			request.Content = formEncoded;
 
 			using var response = await _client.SendAsync(request);
-			response.EnsureSuccessStatusCode();
+			//response.EnsureSuccessStatusCode();
 			string content = await response.Content.ReadAsStringAsync();
 			// log 
 			var token_response = JsonConvert.DeserializeObject<AccessTokenResponse>(content);

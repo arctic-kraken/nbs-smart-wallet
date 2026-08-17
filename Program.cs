@@ -1,6 +1,7 @@
 //using Microsoft.AspNetCore.Authentication.JwtBearer;
 //using System.Security.Cryptography;
 using nbs_smart_wallet.Services;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,11 +13,13 @@ builder.Services.AddHttpClient("revolut", c => { })
     {
         var handler = new HttpClientHandler();
         var certificateWithKey = X509Certificate2.CreateFromPemFile(@"C:\Users\JakubKiepas\transport.pem", @"C:\Users\JakubKiepas\private.key");
-        handler.ClientCertificates.Add(certificateWithKey);
+		// netcore is retarded, turns out I have to turn the pem and pk into pfx and load that one for it to auth
+		var cert = new X509Certificate2(@"C:\Users\JakubKiepas\transport.pfx");
+ 
 
-#if DEBUG
-		handler.ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
-#endif
+        handler.ClientCertificates.Add(cert);
+        handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
+        handler.ClientCertificateOptions = ClientCertificateOption.Manual;
 
 		return handler;
     });
