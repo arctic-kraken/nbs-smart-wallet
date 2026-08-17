@@ -18,7 +18,8 @@ namespace nbs_smart_wallet.Services
 {
 	public class RevolutProxy
 	{
-		public const string sandbox_url = "https://sandbox-oba-auth.revolut.com";
+		public const string sandbox_url = "https://sandbox-oba.revolut.com";
+		public const string sandbox_auth_url = "https://sandbox-oba-auth.revolut.com";
 		public const string sandbox_client_id = "2e62762a-c15b-4aa9-9278-18c280797854";
 		private HttpClient _client;
 		private string client_credential_access_token = string.Empty;
@@ -29,7 +30,7 @@ namespace nbs_smart_wallet.Services
 		public RevolutProxy(IHttpClientFactory clientFactory)
 		{
 			_client = clientFactory.CreateClient("revolut");
-			_client.BaseAddress = new Uri(sandbox_url);
+			//_client.BaseAddress = new Uri(sandbox_url);
 		}
 
 		public class ClientCredentialTokenResponse
@@ -41,7 +42,7 @@ namespace nbs_smart_wallet.Services
 
 		public async Task<bool> GetClientCredentialToken()
 		{
-			string url = $"/token";
+			string url = $"{sandbox_auth_url}/token";
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
 			request.Content?.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 			var form = new Dictionary<string, string> 
@@ -53,6 +54,7 @@ namespace nbs_smart_wallet.Services
 			var formEncoded = new FormUrlEncodedContent(form);
 			request.Content = formEncoded;
 
+			//_client.BaseAddress = new Uri(sandbox_auth_url);
 			using var response = await _client.SendAsync(request);
 
 			response.EnsureSuccessStatusCode();
@@ -114,7 +116,7 @@ namespace nbs_smart_wallet.Services
 			if (String.IsNullOrEmpty(client_credential_access_token))
 				return new AccountAccessConsentResponse();
 
-			string url = $"/account-access-consents";
+			string url = $"{sandbox_auth_url}/account-access-consents";
 
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
 			request.Headers.Add("x-fapi-financial-id", "001580000103UAvAAM");
@@ -128,6 +130,7 @@ namespace nbs_smart_wallet.Services
 
 			request.Content = JsonContent.Create(body, new MediaTypeHeaderValue("application/json"), System.Text.Json.JsonSerializerOptions.Default);
 
+			//_client.BaseAddress = new Uri("");
 			using var response = await _client.SendAsync(request);
 			response.EnsureSuccessStatusCode();
 			string content = await response.Content.ReadAsStringAsync();
@@ -230,23 +233,7 @@ namespace nbs_smart_wallet.Services
 		{
 			var tunnelUrl = Environment.GetEnvironmentVariable("VS_TUNNEL_URL");
 			var coder = UrlEncoder.Create();
-			return $"/ui/index.html?response_type=code%20id_token&scope=accounts&redirect_uri={coder.Encode($"{tunnelUrl}/redirect_target")}&client_id={sandbox_client_id}&request={GetSignedJWTFor(consentId)}";
-		}
-
-		public async void RedirectForAuth(Guid consentId)
-		{
-			string url = GetAuthUrl(consentId);
-			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-			request.Headers.Add("x-fapi-financial-id", "001580000103UAvAAM");
-			using var response = await _client.SendAsync(request);
-
-			//response.EnsureSuccessStatusCode();
-			string content = await response.Content.ReadAsStringAsync();
-			//var credential = JsonConvert.DeserializeObject<ClientCredentialTokenResponse>(content);
-			//client_credential_access_token = credential.access_token;
-
-
-			//return OkObjectResult();
+			return $"{sandbox_url}/ui/index.html?response_type=code%20id_token&scope=accounts&redirect_uri={$"{tunnelUrl}redirect_target"}&client_id={sandbox_client_id}&request={GetSignedJWTFor(consentId)}";
 		}
 
 		public class AccessTokenResponse
@@ -263,7 +250,7 @@ namespace nbs_smart_wallet.Services
 		public async Task<bool> GetAccessToken(string code, string id_token, string state)
 		{
 			var coder = UrlEncoder.Create();
-			string url = $"/token";
+			string url = $"{sandbox_auth_url}/token";
 
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
 			request.Content?.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");

@@ -20,6 +20,8 @@ builder.Services.AddHttpClient("revolut", c => { })
         handler.ClientCertificates.Add(cert);
         handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
         handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+        handler.AllowAutoRedirect = true;
+        handler.MaxAutomaticRedirections = 1;
 
 		return handler;
     });
