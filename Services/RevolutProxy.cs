@@ -21,6 +21,8 @@ namespace nbs_smart_wallet.Services
 		public const string sandbox_url = "https://sandbox-oba.revolut.com";
 		public const string sandbox_auth_url = "https://sandbox-oba-auth.revolut.com";
 		public const string sandbox_client_id = "2e62762a-c15b-4aa9-9278-18c280797854";
+		public const string sandbox_jwk_endpoint = "jwk/auth";
+		public const string sandbox_redirect_uri = "jwk/auth/callback";
 		private HttpClient _client;
 		private string client_credential_access_token = string.Empty;
 		private string client_credential_refresh_token = string.Empty;
@@ -184,12 +186,14 @@ namespace nbs_smart_wallet.Services
 			header.kid = "pallasathena";
 
 			var payload = new JWTPayload();
-			payload.redirect_uri = $"{tunnelUrl}/redirect_target";
+			//payload.redirect_uri = $"{tunnelUrl}{sandbox_jwk_endpoint}/"; // has to be different than this one
+			payload.redirect_uri = $"{tunnelUrl}{sandbox_redirect_uri}/";
 			payload.aud = "https://sandbox-oba-auth.revolut.com";
 			payload.scope = "accounts";
 			//payload.state = "state";
 			payload.claims.id_token.openbanking_intent_id.value = consentId.ToString();
 
+			// TODO - change to grab the pfx
 			var cert = X509Certificate2.CreateFromPemFile(@"C:\Users\JakubKiepas\transport.pem", @"C:\Users\JakubKiepas\private.key");
 			var key = new RsaSecurityKey(cert.GetRSAPrivateKey());
 			key.KeyId = header.kid;
@@ -233,7 +237,7 @@ namespace nbs_smart_wallet.Services
 		{
 			var tunnelUrl = Environment.GetEnvironmentVariable("VS_TUNNEL_URL");
 			var coder = UrlEncoder.Create();
-			return $"{sandbox_url}/ui/index.html?response_type=code%20id_token&scope=accounts&redirect_uri={$"{tunnelUrl}redirect_target"}&client_id={sandbox_client_id}&request={GetSignedJWTFor(consentId)}";
+			return $"{sandbox_url}/ui/index.html?response_type=code%20id_token&scope=accounts&redirect_uri={$"{tunnelUrl}{sandbox_redirect_uri}"}&client_id={sandbox_client_id}&request={GetSignedJWTFor(consentId)}";
 		}
 
 		public class AccessTokenResponse
@@ -243,7 +247,8 @@ namespace nbs_smart_wallet.Services
 			public string token_type { get; set; } = string.Empty;
 			public int expires_in { get; set; }
 			public string refresh_token { get; set; } = string.Empty;
-			public int refresh_token_expires_at { get; set; }
+			// Unix timestamp below
+			public string refresh_token_expires_at { get; set; } = string.Empty;
 
 		}
 
@@ -306,7 +311,7 @@ namespace nbs_smart_wallet.Services
 		public async Task<List<AppAccount>> GetAccounts()
 		{
 			if (String.IsNullOrEmpty(access_token))
-				throw new InvalidOperationException();
+				throw new InvalidOperationException("access_token is empty");
 
 			string url = $"/accounts";
 
