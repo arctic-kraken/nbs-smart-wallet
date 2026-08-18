@@ -1,7 +1,4 @@
-//using Microsoft.AspNetCore.Authentication.JwtBearer;
-//using System.Security.Cryptography;
 using nbs_smart_wallet.Services;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,15 +24,6 @@ builder.Services.AddHttpClient("revolut", c => { })
     });
 
 builder.Services.AddScoped<RevolutProxy>();
-
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddJwtBearer(jwtOptions =>
-//    {
-//        jwtOptions.Authority = "";
-//        jwtOptions.Authority = "";
-//    });
-
-
 
 var app = builder.Build();
 

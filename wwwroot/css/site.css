@@ -1,3 +1,19 @@
+@import "tailwindcss";
+
+@font-face {
+    font-family: "Novatica";
+    font-style: normal;
+    font-weight: 200 700;
+    font-display: swap;
+    src: url("/fonts/bc-novatica-cyr.otf") format("opentype");
+}
+
+@theme {
+    --font-novatica: "Novatica";
+    --color-nbs-blue: #004A99;
+    --color-nbs-orange: #ED7723;
+}
+
 html {
   font-size: 14px;
 }
