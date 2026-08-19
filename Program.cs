@@ -1,8 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using nbs_smart_wallet.Models;
 using nbs_smart_wallet.Services;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration
+    .AddJsonFile("appsettings.json")
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json")
+    .AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -25,9 +31,11 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddDbContext<nbsDbContext>(options =>
 {
-    options.UseNpgsql(@"");
+    
+    options.UseNpgsql(builder.Configuration["DefaultConnection"]);
 });
 
+//builder.Services.Configure<RevolutProxyConfig>(builder.Configuration.GetSection(""));
 
 builder.Services.AddScoped<RevolutProxy>();
 
