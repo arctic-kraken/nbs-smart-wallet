@@ -21,6 +21,7 @@ development processes used.
 The application should be based on something of relevance to your job role and/or organisation. For
 example, this could be to manage IT Assets, Help Desk Tickets or Customer Details. Note, you may
 need to simplify your real data to fit the brief - if you are unsure seek guidance from your tutor.
+
 The application should include a simple database of your choice, that can be implemented. The
 tables/collections in the finished database should contain several sample records (rows) for testing
 purposes. Table columns should include a range of appropriate data types. Suitable fields should be
