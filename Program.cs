@@ -1,6 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using nbs_smart_wallet.Models;
 using nbs_smart_wallet.Services;
-using System.Net;
-using System.Security.Cryptography.X509Certificates;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +22,12 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddDbContext<nbsDbContext>(options =>
+{
+    options.UseNpgsql(@"");
+});
+
 
 builder.Services.AddScoped<RevolutProxy>();
 

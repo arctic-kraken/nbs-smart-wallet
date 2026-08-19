@@ -345,7 +345,7 @@ namespace nbs_smart_wallet.Services
 		public class BankAccount
 		{
 			public string SchemeName { get; set; } = string.Empty;
-			public string Identification { get; set; }
+			public string Identification { get; set; } = string.Empty;
 			public string Name { get; set; } = string.Empty;
 			public string SecondaryIdentification { get; set; } = string.Empty;
 
