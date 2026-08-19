@@ -10,12 +10,15 @@ builder.Configuration
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json")
     .AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
+var revolutProxyConfigSection = builder.Configuration.GetSection("RevolutProxyConfig");
+builder.Services.Configure<RevolutProxyConfig>(revolutProxyConfigSection);
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient("revolut", c => { })
     .ConfigurePrimaryHttpMessageHandler(() =>
     {
-        var handler = RevolutProxy.GetDefaultRevolutHandler();
+        var handler = RevolutProxy.GetDefaultRevolutHandler(revolutProxyConfigSection["pfx_path"]);
 		return handler;
     });
 
@@ -29,13 +32,12 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddDbContext<nbsDbContext>(options =>
-{
+//builder.Services.AddDbContext<nbsDbContext>(options =>
+//{
     
-    options.UseNpgsql(builder.Configuration["DefaultConnection"]);
-});
+//    options.UseNpgsql(builder.Configuration["DefaultConnection"]);
+//});
 
-//builder.Services.Configure<RevolutProxyConfig>(builder.Configuration.GetSection(""));
 
 builder.Services.AddScoped<RevolutProxy>();
 

@@ -1,18 +1,10 @@
-﻿
-using JsonConverter.Newtonsoft.Json;
-using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.JsonWebTokens;
+﻿using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
+using nbs_smart_wallet.Models;
 using Newtonsoft.Json;
-using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http.Headers;
-using System.Runtime.ConstrainedExecution;
-using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Text.Encodings.Web;
 
 namespace nbs_smart_wallet.Services
@@ -28,18 +20,45 @@ namespace nbs_smart_wallet.Services
 		private const string refresh_token_name = "wallet_rtoken";
 		private HttpClient _client;
 		private IHttpContextAccessor _accessor;
+		private RevolutProxyConfig _config;
 		private string client_credential_access_token = string.Empty;
 		private string client_credential_refresh_token = string.Empty;
 		private string access_token = string.Empty;
 		private string refresh_token = string.Empty;
+		
 
-		public RevolutProxy(IHttpClientFactory clientFactory, IHttpContextAccessor contextAccessor)
+		public RevolutProxy(IHttpClientFactory clientFactory, IHttpContextAccessor contextAccessor, RevolutProxyConfig config)
 		{
 			_client = clientFactory.CreateClient("revolut");
 			_accessor = contextAccessor;
-			
-			//_client.BaseAddress = new Uri(sandbox_url);
+			_config = config;
 		}
+
+		public static HttpClientHandler GetDefaultRevolutHandler(string path)
+		{
+			var handler = new HttpClientHandler();
+			handler.ClientCertificates.Add(GetSigningCertificateWith(path));
+			handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
+			handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+			handler.AllowAutoRedirect = true;
+			handler.MaxAutomaticRedirections = 1;
+
+			return handler;
+		}
+
+		// netcore is retarded, turns out I have to turn the pem and pk into pfx and load that one for it to auth
+		private static X509Certificate2 GetSigningCertificateWith(string path)
+		{
+			var pfxBytes = File.ReadAllBytes(path);
+			var cert = X509CertificateLoader.LoadPkcs12(
+				pfxBytes,
+				null,
+				keyStorageFlags: X509KeyStorageFlags.MachineKeySet
+			);
+			return cert;
+		}
+
+		private X509Certificate2 GetSigningCertificate() => GetSigningCertificateWith(_config.pfx_path);
 
 		public class ClientCredentialTokenResponse
 		{
@@ -184,22 +203,6 @@ namespace nbs_smart_wallet.Services
 			public string value { get; set; } = string.Empty;
 		}
 
-		public static HttpClientHandler GetDefaultRevolutHandler()
-		{
-			var handler = new HttpClientHandler();
-			//var certificateWithKey = X509Certificate2.CreateFromPemFile(@"C:\Users\JakubKiepas\transport.pem", @"C:\Users\JakubKiepas\private.key");
-			// netcore is retarded, turns out I have to turn the pem and pk into pfx and load that one for it to auth
-			var cert = new X509Certificate2(@"C:\Users\JakubKiepas\transport.pfx");
-
-
-			handler.ClientCertificates.Add(cert);
-			handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
-			handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-			handler.AllowAutoRedirect = true;
-			handler.MaxAutomaticRedirections = 1;
-
-			return handler;
-		}
 
 		public string GetSignedJWTFor(Guid consentId)
 		{
