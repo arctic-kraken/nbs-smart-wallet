@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Runtime.ConstrainedExecution;
 using System.Security.Claims;
@@ -23,15 +24,20 @@ namespace nbs_smart_wallet.Services
 		public const string sandbox_client_id = "2e62762a-c15b-4aa9-9278-18c280797854";
 		public const string sandbox_jwk_endpoint = "jwk/auth";
 		public const string sandbox_redirect_uri = "jwk/auth/callback";
+		private const string access_token_name = "wallet_atoken";
+		private const string refresh_token_name = "wallet_rtoken";
 		private HttpClient _client;
+		private IHttpContextAccessor _accessor;
 		private string client_credential_access_token = string.Empty;
 		private string client_credential_refresh_token = string.Empty;
 		private string access_token = string.Empty;
 		private string refresh_token = string.Empty;
 
-		public RevolutProxy(IHttpClientFactory clientFactory)
+		public RevolutProxy(IHttpClientFactory clientFactory, IHttpContextAccessor contextAccessor)
 		{
 			_client = clientFactory.CreateClient("revolut");
+			_accessor = contextAccessor;
+			
 			//_client.BaseAddress = new Uri(sandbox_url);
 		}
 
@@ -178,6 +184,22 @@ namespace nbs_smart_wallet.Services
 			public string value { get; set; } = string.Empty;
 		}
 
+		public static HttpClientHandler GetDefaultRevolutHandler()
+		{
+			var handler = new HttpClientHandler();
+			//var certificateWithKey = X509Certificate2.CreateFromPemFile(@"C:\Users\JakubKiepas\transport.pem", @"C:\Users\JakubKiepas\private.key");
+			// netcore is retarded, turns out I have to turn the pem and pk into pfx and load that one for it to auth
+			var cert = new X509Certificate2(@"C:\Users\JakubKiepas\transport.pfx");
+
+
+			handler.ClientCertificates.Add(cert);
+			handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
+			handler.ClientCertificateOptions = ClientCertificateOption.Manual;
+			handler.AllowAutoRedirect = true;
+			handler.MaxAutomaticRedirections = 1;
+
+			return handler;
+		}
 
 		public string GetSignedJWTFor(Guid consentId)
 		{
@@ -272,15 +294,43 @@ namespace nbs_smart_wallet.Services
 			//response.EnsureSuccessStatusCode();
 			string content = await response.Content.ReadAsStringAsync();
 			// log 
+			var cookie_jar = new CookieContainer();
 			var token_response = JsonConvert.DeserializeObject<AccessTokenResponse>(content);
 			if (token_response == null)
 				return false;
 
-			this.access_token = token_response.access_token;
-			this.refresh_token = token_response.refresh_token;
+			var tunnelUrl = Environment.GetEnvironmentVariable("VS_TUNNEL_URL");
+
+			// remember about cookie security
+			AddTokenCookies(token_response.access_token, token_response.refresh_token);
 
 			return true;
 		}
+
+		private void AddTokenCookies(string? access_token, string? refresh_token)
+		{
+			var options = new CookieOptions
+			{
+				HttpOnly = true,
+				IsEssential = true,
+				Secure = true,
+			};
+			// TODO - encrypt these cookies and decrypt etc etc
+			if (!String.IsNullOrEmpty(access_token))
+				_accessor.HttpContext?.Response.Cookies.Append(access_token_name, access_token, options);
+
+			if (!String.IsNullOrEmpty(refresh_token))
+				_accessor.HttpContext?.Response.Cookies.Append(refresh_token_name, refresh_token, options);
+		}
+
+		private string GetAccessTokenFromCookie()
+		{
+			if (_accessor.HttpContext == null)
+				return string.Empty;
+			var a_token = _accessor.HttpContext.Request.Cookies.SingleOrDefault(x => x.Key == access_token_name);
+			
+			return a_token.Value;
+		} 
 
 		public class AppAccount
 		{
@@ -295,7 +345,7 @@ namespace nbs_smart_wallet.Services
 		public class BankAccount
 		{
 			public string SchemeName { get; set; } = string.Empty;
-			public int Identification { get; set; }
+			public string Identification { get; set; }
 			public string Name { get; set; } = string.Empty;
 			public string SecondaryIdentification { get; set; } = string.Empty;
 
@@ -310,17 +360,20 @@ namespace nbs_smart_wallet.Services
 
 		public async Task<List<AppAccount>> GetAccounts()
 		{
-			if (String.IsNullOrEmpty(access_token))
+			var token = GetAccessTokenFromCookie();
+			if (String.IsNullOrEmpty(token))
 				throw new InvalidOperationException("access_token is empty");
 
-			string url = $"/accounts";
+			// https://developer.revolut.com/blog/2025-03-04-open-banking-fapi1-advanced#new-subdomains-and-mandatory-mtls
+			// https://developer.revolut.com/updates/2025-03-04-open-banking-fapi1-advanced#new-subdomains-and-mandatory-mtls
+			string url = $"{sandbox_auth_url}/accounts";
 
-			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
+			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
 			request.Headers.Add("x-fapi-financial-id", "001580000103UAvAAM");
-			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", access_token);
+			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
 			using var response = await _client.SendAsync(request);
-			response.EnsureSuccessStatusCode();
+			//response.EnsureSuccessStatusCode();
 			string content = await response.Content.ReadAsStringAsync();
 			var accounts = JsonConvert.DeserializeObject<AccountResponse>(content);
 			// log 

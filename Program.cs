@@ -1,4 +1,5 @@
 using nbs_smart_wallet.Services;
+using System.Net;
 using System.Security.Cryptography.X509Certificates;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,20 +9,19 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient("revolut", c => { })
     .ConfigurePrimaryHttpMessageHandler(() =>
     {
-        var handler = new HttpClientHandler();
-        var certificateWithKey = X509Certificate2.CreateFromPemFile(@"C:\Users\JakubKiepas\transport.pem", @"C:\Users\JakubKiepas\private.key");
-		// netcore is retarded, turns out I have to turn the pem and pk into pfx and load that one for it to auth
-		var cert = new X509Certificate2(@"C:\Users\JakubKiepas\transport.pfx");
- 
-
-        handler.ClientCertificates.Add(cert);
-        handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
-        handler.ClientCertificateOptions = ClientCertificateOption.Manual;
-        handler.AllowAutoRedirect = true;
-        handler.MaxAutomaticRedirections = 1;
-
+        var handler = RevolutProxy.GetDefaultRevolutHandler();
 		return handler;
     });
+
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<RevolutProxy>();
 
@@ -34,6 +34,8 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseSession();
 
 app.UseHttpsRedirection();
 app.UseRouting();

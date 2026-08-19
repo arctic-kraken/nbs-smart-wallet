@@ -92,9 +92,9 @@ public class HomeController : Controller
 
 	[HttpGet]
 	[Route("/accounts")]
-	public ActionResult Accounts()
+	public async Task<ActionResult> Accounts()
 	{
-		var response = _revolutProxy.GetAccounts();
+		var response = await _revolutProxy.GetAccounts();
 		return Ok(response);
 	}
 }
