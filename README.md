@@ -35,12 +35,7 @@ should be included so that the user cannot perform an invalid action or enter no
 for a field. Appropriate error messages should be displayed when validation rules are breached.
 
 Guidance:
-• Your solution should adhere to the basic design guidelines of modularisation by dividing the
-functionality up into appropriate elements.
-• Ensure the quality and readability of your code by following basic programming guidelines such as
-naming conventions, indentation, comments and refactoring to avoid duplication of logic.
-• Usability should be considered. For example, after completing an option, the user should be
-shown an appropriate message that indicates the success or failure of their action. Also, to
-confirm with the user before quitting the application or deleting a record.
-• The app must be demonstrably secure from attacks that attempt to exploit any relevant OWASP
-Top 10 vulnerabilities.
+- Your solution should adhere to the basic design guidelines of modularisation by dividing the functionality up into appropriate elements.
+- Ensure the quality and readability of your code by following basic programming guidelines such as naming conventions, indentation, comments and refactoring to avoid duplication of logic.
+- Usability should be considered. For example, after completing an option, the user should be shown an appropriate message that indicates the success or failure of their action. Also, to confirm with the user before quitting the application or deleting a record.
+- The app must be demonstrably secure from attacks that attempt to exploit any relevant OWASP Top 10 vulnerabilities.
