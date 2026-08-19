@@ -27,11 +27,12 @@ namespace nbs_smart_wallet.Services
 		private string refresh_token = string.Empty;
 		
 
-		public RevolutProxy(IHttpClientFactory clientFactory, IHttpContextAccessor contextAccessor, RevolutProxyConfig config)
+		public RevolutProxy(IHttpClientFactory clientFactory, IHttpContextAccessor contextAccessor, IConfiguration config)
 		{
 			_client = clientFactory.CreateClient("revolut");
 			_accessor = contextAccessor;
-			_config = config;
+			_config = config.GetSection("RevolutProxyConfig").Get<RevolutProxyConfig>() 
+				?? throw new Exception("Failed to get Revolut Proxy Config"); // this will never throw, get rids of warning though
 		}
 
 		public static HttpClientHandler GetDefaultRevolutHandler(string path)

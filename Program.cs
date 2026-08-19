@@ -11,7 +11,7 @@ builder.Configuration
     .AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
 var revolutProxyConfigSection = builder.Configuration.GetSection("RevolutProxyConfig");
-builder.Services.Configure<RevolutProxyConfig>(revolutProxyConfigSection);
+//builder.Services.Configure<RevolutProxyConfig>(revolutProxyConfigSection);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

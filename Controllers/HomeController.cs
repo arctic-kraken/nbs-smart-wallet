@@ -10,11 +10,9 @@ namespace nbs_smart_wallet.Controllers;
 public class HomeController : Controller
 {
     private RevolutProxy _revolutProxy;
-    private RevolutProxyConfig _config;
-    public HomeController(RevolutProxy revolutProxy, RevolutProxyConfig config)
+    public HomeController(RevolutProxy revolutProxy)
     {
         _revolutProxy = revolutProxy;
-        _config = config;
     }
 
     public IActionResult Index()
