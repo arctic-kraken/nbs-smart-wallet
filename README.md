@@ -39,3 +39,15 @@ Guidance:
 - Ensure the quality and readability of your code by following basic programming guidelines such as naming conventions, indentation, comments and refactoring to avoid duplication of logic.
 - Usability should be considered. For example, after completing an option, the user should be shown an appropriate message that indicates the success or failure of their action. Also, to confirm with the user before quitting the application or deleting a record.
 - The app must be demonstrably secure from attacks that attempt to exploit any relevant OWASP Top 10 vulnerabilities.
+
+---
+
+Using an APPROPRIATE ENVIRONMENT AND LANGUAGES/TOOLS/DATABASE design, build and test a
+secure application that satisfies the requirements and guidelines.
+Evidence required:
+- A summary/explanation of the application.
+- Software Development Life Cycle Approach (SDLC) Min - (Planning, Design, Develop Testing)
+- A GitHub or Online Repository with access provided to marker, of all coding artefacts, including the SQLite database and automated unit tests (if applicable).
+- Screenshot evidence of app defending itself from attacks that attempt to exploit at least three different OWASP Top 10 vulnerabilities.
+- Online deployment of the application live with working link provided.
+- Source Code should be placed into the Appendices in text format. This is supporting evidence, and will not be included in the total word count.
