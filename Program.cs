@@ -10,15 +10,15 @@ builder.Configuration
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json")
     .AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
-var revolutProxyConfigSection = builder.Configuration.GetSection("RevolutProxyConfig");
-//builder.Services.Configure<RevolutProxyConfig>(revolutProxyConfigSection);
+var revolutConfig = builder.Configuration.GetSection("RevolutProxyConfig").Get<RevolutProxyConfig>()
+    ?? throw new Exception("Failed to load Revolut Proxy Config");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient("revolut", c => { })
     .ConfigurePrimaryHttpMessageHandler(() =>
     {
-        var handler = RevolutProxy.GetDefaultRevolutHandler(revolutProxyConfigSection["pfx_path"]);
+        var handler = RevolutProxy.GetDefaultRevolutHandler(revolutConfig.pfx_path);
 		return handler;
     });
 

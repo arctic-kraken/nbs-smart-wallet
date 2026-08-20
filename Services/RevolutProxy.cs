@@ -11,13 +11,6 @@ namespace nbs_smart_wallet.Services
 {
 	public class RevolutProxy
 	{
-		public const string sandbox_url = "https://sandbox-oba.revolut.com";
-		public const string sandbox_auth_url = "https://sandbox-oba-auth.revolut.com";
-		public const string sandbox_client_id = "2e62762a-c15b-4aa9-9278-18c280797854";
-		public const string sandbox_jwk_endpoint = "jwk/auth";
-		public const string sandbox_redirect_uri = "jwk/auth/callback";
-		private const string access_token_name = "wallet_atoken";
-		private const string refresh_token_name = "wallet_rtoken";
 		private HttpClient _client;
 		private IHttpContextAccessor _accessor;
 		private RevolutProxyConfig _config;
@@ -35,10 +28,10 @@ namespace nbs_smart_wallet.Services
 				?? throw new Exception("Failed to get Revolut Proxy Config"); // this will never throw, get rids of warning though
 		}
 
-		public static HttpClientHandler GetDefaultRevolutHandler(string path)
+		public static HttpClientHandler GetDefaultRevolutHandler(string pfx_path)
 		{
 			var handler = new HttpClientHandler();
-			handler.ClientCertificates.Add(GetSigningCertificateWith(path));
+			handler.ClientCertificates.Add(GetSigningCertificateWith(pfx_path));
 			handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
 			handler.ClientCertificateOptions = ClientCertificateOption.Manual;
 			handler.AllowAutoRedirect = true;
@@ -70,14 +63,14 @@ namespace nbs_smart_wallet.Services
 
 		public async Task<bool> GetClientCredentialToken()
 		{
-			string url = $"{sandbox_auth_url}/token";
+			string url = $"{_config.auth_url}/token";
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
 			request.Content?.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 			var form = new Dictionary<string, string> 
 			{
 				{ "grant_type", "client_credentials" },
 				{ "scope", "accounts" },
-				{ "client_id", sandbox_client_id },
+				{ "client_id", _config.client_id },
 			};
 			var formEncoded = new FormUrlEncodedContent(form);
 			request.Content = formEncoded;
@@ -144,10 +137,10 @@ namespace nbs_smart_wallet.Services
 			if (String.IsNullOrEmpty(client_credential_access_token))
 				return new AccountAccessConsentResponse();
 
-			string url = $"{sandbox_auth_url}/account-access-consents";
+			string url = $"{_config.auth_url}/account-access-consents";
 
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
-			request.Headers.Add("x-fapi-financial-id", "001580000103UAvAAM");
+			request.Headers.Add("x-fapi-financial-id", _config.revolut_financial_id);
 			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", client_credential_access_token);
 			request.Content?.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
@@ -170,59 +163,15 @@ namespace nbs_smart_wallet.Services
 			return account_access_consent;
 		}
 
-		public class JWTHeader
-		{
-			public string alg { get; set; } = "PS256";
-			public string kid { get; set; } = string.Empty;
-		}
-
-		public class JWTPayload
-		{
-			public string response_type { get; set; } = "code id_token";
-			public string client_id { get; set; } = sandbox_client_id;
-			public string redirect_uri { get; set; } = string.Empty;
-			public string aud = string.Empty;
-			public string scope = string.Empty;
-			public string state = "somestate";
-			public string nbf { get; set; } = string.Empty;
-			public string exp{ get; set; } = string.Empty;
-			public Claims claims { get; set; } = new Claims();
-		}
-
-		public class Claims
-		{
-			public Id_token id_token { get; set; } = new Id_token();
-			
-		}
-		public class Id_token
-		{
-			public OpenBanking_intent_id openbanking_intent_id { get; set; } = new OpenBanking_intent_id();
-
-		}
-		public class OpenBanking_intent_id
-		{
-			public string value { get; set; } = string.Empty;
-		}
-
 
 		public string GetSignedJWTFor(Guid consentId)
 		{
 			var tunnelUrl = Environment.GetEnvironmentVariable("VS_TUNNEL_URL");
-			var header = new JWTHeader();
-			header.kid = "pallasathena";
 
-			var payload = new JWTPayload();
-			//payload.redirect_uri = $"{tunnelUrl}{sandbox_jwk_endpoint}/"; // has to be different than this one
-			payload.redirect_uri = $"{tunnelUrl}{sandbox_redirect_uri}/";
-			payload.aud = "https://sandbox-oba-auth.revolut.com";
-			payload.scope = "accounts";
-			//payload.state = "state";
-			payload.claims.id_token.openbanking_intent_id.value = consentId.ToString();
-
-			// TODO - change to grab the pfx
-			var cert = X509Certificate2.CreateFromPemFile(@"C:\Users\JakubKiepas\transport.pem", @"C:\Users\JakubKiepas\private.key");
+			//var cert = X509Certificate2.CreateFromPemFile(@"C:\Users\JakubKiepas\transport.pem", @"C:\Users\JakubKiepas\private.key");
+			var cert = GetSigningCertificate();
 			var key = new RsaSecurityKey(cert.GetRSAPrivateKey());
-			key.KeyId = header.kid;
+			key.KeyId = _config.jwk.keys.First().kid;
 			var handler = new JsonWebTokenHandler();
 			var desc = new SecurityTokenDescriptor
 			{
@@ -233,11 +182,11 @@ namespace nbs_smart_wallet.Services
 				SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.RsaSsaPssSha256),
 				Claims = new Dictionary<string, object>
 				{
-					{ "scope", payload.scope },
-					{ "state", payload.state },
-					{ "client_id", payload.client_id },
-					{ "response_type", payload.response_type },
-					{ "redirect_uri", payload.redirect_uri },
+					{ "scope", "accounts" },
+					{ "state", "somestate" },
+					{ "client_id", _config.client_id },
+					{ "response_type", "code id_token" },
+					{ "redirect_uri", _config.auth_redirect_endpoint },
 					{ "claims", new Dictionary<string, object>
 						{
 							{ "id_token", new Dictionary<string, object>
@@ -261,10 +210,12 @@ namespace nbs_smart_wallet.Services
 
 		public string GetAuthUrl(Guid consentId)
 		{
-			var tunnelUrl = Environment.GetEnvironmentVariable("VS_TUNNEL_URL");
+			var hostname = _accessor.HttpContext?.Request.Host.Value;
 			var coder = UrlEncoder.Create();
-			return $"{sandbox_url}/ui/index.html?response_type=code%20id_token&scope=accounts&redirect_uri={$"{tunnelUrl}{sandbox_redirect_uri}"}&client_id={sandbox_client_id}&request={GetSignedJWTFor(consentId)}";
+			return $"{_config.url}/ui/index.html?response_type=code%20id_token&scope=accounts&redirect_uri={$"https://{hostname}/{_config.auth_redirect_endpoint}"}&client_id={_config.client_id}&request={GetSignedJWTFor(consentId)}";
 		}
+		
+		public nbs_smart_wallet.Models.JsonWebKey GetJWK() => _config.jwk;
 
 		public class AccessTokenResponse
 		{
@@ -281,7 +232,7 @@ namespace nbs_smart_wallet.Services
 		public async Task<bool> GetAccessToken(string code, string id_token, string state)
 		{
 			var coder = UrlEncoder.Create();
-			string url = $"{sandbox_auth_url}/token";
+			string url = $"{_config.auth_url}/token";
 
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
 			request.Content?.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
@@ -289,7 +240,7 @@ namespace nbs_smart_wallet.Services
 			{
 				{ "grant_type", "authorization_code" },
 				{ "code", code },
-				{ "client_id", sandbox_client_id },
+				{ "client_id", _config.client_id},
 			};
 			var formEncoded = new FormUrlEncodedContent(form);
 			request.Content = formEncoded;
@@ -302,8 +253,6 @@ namespace nbs_smart_wallet.Services
 			var token_response = JsonConvert.DeserializeObject<AccessTokenResponse>(content);
 			if (token_response == null)
 				return false;
-
-			var tunnelUrl = Environment.GetEnvironmentVariable("VS_TUNNEL_URL");
 
 			// remember about cookie security
 			AddTokenCookies(token_response.access_token, token_response.refresh_token);
@@ -321,17 +270,17 @@ namespace nbs_smart_wallet.Services
 			};
 			// TODO - encrypt these cookies and decrypt etc etc
 			if (!String.IsNullOrEmpty(access_token))
-				_accessor.HttpContext?.Response.Cookies.Append(access_token_name, access_token, options);
+				_accessor.HttpContext?.Response.Cookies.Append(_config.access_token_cookie_name, access_token, options);
 
 			if (!String.IsNullOrEmpty(refresh_token))
-				_accessor.HttpContext?.Response.Cookies.Append(refresh_token_name, refresh_token, options);
+				_accessor.HttpContext?.Response.Cookies.Append(_config.refresh_token_cookie_name, refresh_token, options);
 		}
 
 		private string GetAccessTokenFromCookie()
 		{
 			if (_accessor.HttpContext == null)
 				return string.Empty;
-			var a_token = _accessor.HttpContext.Request.Cookies.SingleOrDefault(x => x.Key == access_token_name);
+			var a_token = _accessor.HttpContext.Request.Cookies.SingleOrDefault(x => x.Key == _config.access_token_cookie_name);
 			
 			return a_token.Value;
 		} 
@@ -370,10 +319,10 @@ namespace nbs_smart_wallet.Services
 
 			// https://developer.revolut.com/blog/2025-03-04-open-banking-fapi1-advanced#new-subdomains-and-mandatory-mtls
 			// https://developer.revolut.com/updates/2025-03-04-open-banking-fapi1-advanced#new-subdomains-and-mandatory-mtls
-			string url = $"{sandbox_auth_url}/accounts";
+			string url = $"{_config.auth_url}/accounts";
 
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
-			request.Headers.Add("x-fapi-financial-id", "001580000103UAvAAM");
+			request.Headers.Add("x-fapi-financial-id", _config.revolut_financial_id);
 			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
 			using var response = await _client.SendAsync(request);
