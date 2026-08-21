@@ -11,8 +11,10 @@ builder.Configuration
     .AddJsonFile($"appsettings.Development.json")
     .AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
-var revolutConfig = builder.Configuration.GetSection("RevolutProxyConfig").Get<RevolutProxyConfig>()
-    ?? throw new Exception("Failed to load Revolut Proxy Config");
+//var revolutConfig = builder.Configuration.GetSection("RevolutProxyConfig").Get<RevolutProxyConfig>()
+//    ?? throw new Exception("Failed to load Revolut Proxy Config");
+
+var revolutConfig = Environment.GetEnvironmentVariable("RevolutProxyConfig");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
