@@ -35,7 +35,7 @@ namespace nbs_smart_wallet.Services
 			handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
 			handler.ClientCertificateOptions = ClientCertificateOption.Manual;
 			handler.AllowAutoRedirect = true;
-			handler.MaxAutomaticRedirections = 2;
+			handler.MaxAutomaticRedirections = 5;
 
 			return handler;
 		}
