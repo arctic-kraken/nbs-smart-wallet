@@ -19,7 +19,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient("revolut", c => { })
     .ConfigurePrimaryHttpMessageHandler(() =>
     {
-        var handler = RevolutProxy.GetDefaultRevolutHandler(revolutConfig.pfx_content);
+        var content = Environment.GetEnvironmentVariable("pfx_content");
+        var handler = RevolutProxy.GetDefaultRevolutHandler(content);
 		return handler;
     });
 
