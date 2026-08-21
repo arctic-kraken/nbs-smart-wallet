@@ -8,7 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration
     .AddJsonFile("appsettings.json")
     //.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json")
-    .AddJsonFile($"appsettings.Development.json")
+    //.AddJsonFile($"appsettings.Development.json")
+    //.AddEnvironmentVariables()
     .AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
 //var revolutConfig = builder.Configuration.GetSection("RevolutProxyConfig").Get<RevolutProxyConfig>()
