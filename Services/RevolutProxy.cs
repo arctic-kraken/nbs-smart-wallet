@@ -52,7 +52,7 @@ namespace nbs_smart_wallet.Services
 			return cert;
 		}
 
-		private X509Certificate2 GetSigningCertificate() => GetSigningCertificateWith(_config.pfx_content);
+		private X509Certificate2 GetSigningCertificate() => GetSigningCertificateWith(Environment.GetEnvironmentVariable("pfx_content") ?? "");
 
 		public class ClientCredentialTokenResponse
 		{
