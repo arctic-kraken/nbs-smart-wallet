@@ -1,8 +1,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build-env
 WORKDIR /app
 
-ENV DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE=false
-
 # Copy csproj and restore as distinct layers
 COPY *.csproj ./
 

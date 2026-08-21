@@ -20,12 +20,15 @@ namespace nbs_smart_wallet.Services
 		private string refresh_token = string.Empty;
 		
 
-		public RevolutProxy(IHttpClientFactory clientFactory, IHttpContextAccessor contextAccessor, IConfiguration config)
+		public RevolutProxy(IHttpClientFactory clientFactory, IHttpContextAccessor contextAccessor)
 		{
 			_client = clientFactory.CreateClient("revolut");
 			_accessor = contextAccessor;
-			_config = config.GetSection("RevolutProxyConfig").Get<RevolutProxyConfig>() 
-				?? throw new Exception("Failed to get Revolut Proxy Config"); // this will never throw, get rids of warning though
+			var config_str = Environment.GetEnvironmentVariable("RevolutProxyConfig");
+			if (String.IsNullOrEmpty(config_str))
+				throw new Exception("Failed to load Revolut Proxy Config at HOME");
+			var config = JsonConvert.DeserializeObject<RevolutProxyConfig>(config_str);
+			_config = config ?? throw new Exception("Revolut Proxy Config has not been deserialized because a null was given");
 		}
 
 		public static HttpClientHandler GetDefaultRevolutHandler(string pfx_contents)
@@ -151,7 +154,6 @@ namespace nbs_smart_wallet.Services
 
 			request.Content = JsonContent.Create(body, new MediaTypeHeaderValue("application/json"), System.Text.Json.JsonSerializerOptions.Default);
 
-			//_client.BaseAddress = new Uri("");
 			using var response = await _client.SendAsync(request);
 			response.EnsureSuccessStatusCode();
 			string content = await response.Content.ReadAsStringAsync();
@@ -168,7 +170,6 @@ namespace nbs_smart_wallet.Services
 		{
 			var tunnelUrl = Environment.GetEnvironmentVariable("VS_TUNNEL_URL");
 
-			//var cert = X509Certificate2.CreateFromPemFile(@"C:\Users\JakubKiepas\transport.pem", @"C:\Users\JakubKiepas\private.key");
 			var cert = GetSigningCertificate();
 			var key = new RsaSecurityKey(cert.GetRSAPrivateKey());
 			key.KeyId = _config.jwk.keys.First().kid;

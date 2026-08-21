@@ -7,13 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration
     .AddJsonFile("appsettings.json")
-    //.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json")
-    //.AddJsonFile($"appsettings.Development.json")
     //.AddEnvironmentVariables()
     .AddUserSecrets(Assembly.GetExecutingAssembly(), true);
-
-//var revolutConfig = builder.Configuration.GetSection("RevolutProxyConfig").Get<RevolutProxyConfig>()
-//    ?? throw new Exception("Failed to load Revolut Proxy Config");
 
 var revolutConfig = Environment.GetEnvironmentVariable("RevolutProxyConfig");
 
@@ -39,7 +34,6 @@ builder.Services.AddHttpContextAccessor();
 
 //builder.Services.AddDbContext<nbsDbContext>(options =>
 //{
-    
 //    options.UseNpgsql(builder.Configuration["DefaultConnection"]);
 //});
 
