@@ -7,7 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration
     .AddJsonFile("appsettings.json")
-    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json")
+    //.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json")
+    .AddJsonFile($"appsettings.Development.json")
     .AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
 var revolutConfig = builder.Configuration.GetSection("RevolutProxyConfig").Get<RevolutProxyConfig>()
@@ -18,7 +19,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient("revolut", c => { })
     .ConfigurePrimaryHttpMessageHandler(() =>
     {
-        var handler = RevolutProxy.GetDefaultRevolutHandler(revolutConfig.pfx_path);
+        var handler = RevolutProxy.GetDefaultRevolutHandler(revolutConfig.pfx_content);
 		return handler;
     });
 
@@ -41,6 +42,7 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<RevolutProxy>();
 
+builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

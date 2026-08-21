@@ -12,6 +12,7 @@
 		public string refresh_token_cookie_name { get; set; } = string.Empty;
 		public string revolut_financial_id { get; set; } = string.Empty;
 		public string pfx_path { get; set; } = string.Empty;
+		public string pfx_content { get; set; } = string.Empty;
 	}
 
 	public class JsonWebKey

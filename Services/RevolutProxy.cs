@@ -28,10 +28,10 @@ namespace nbs_smart_wallet.Services
 				?? throw new Exception("Failed to get Revolut Proxy Config"); // this will never throw, get rids of warning though
 		}
 
-		public static HttpClientHandler GetDefaultRevolutHandler(string pfx_path)
+		public static HttpClientHandler GetDefaultRevolutHandler(string pfx_contents)
 		{
 			var handler = new HttpClientHandler();
-			handler.ClientCertificates.Add(GetSigningCertificateWith(pfx_path));
+			handler.ClientCertificates.Add(GetSigningCertificateWith(pfx_contents));
 			handler.SslProtocols = System.Security.Authentication.SslProtocols.Tls12 | System.Security.Authentication.SslProtocols.Tls13;
 			handler.ClientCertificateOptions = ClientCertificateOption.Manual;
 			handler.AllowAutoRedirect = true;
@@ -41,9 +41,9 @@ namespace nbs_smart_wallet.Services
 		}
 
 		// netcore is retarded, turns out I have to turn the pem and pk into pfx and load that one for it to auth
-		private static X509Certificate2 GetSigningCertificateWith(string path)
+		private static X509Certificate2 GetSigningCertificateWith(string contents)
 		{
-			var pfxBytes = File.ReadAllBytes(path);
+			var pfxBytes = Convert.FromBase64String(contents);
 			var cert = X509CertificateLoader.LoadPkcs12(
 				pfxBytes,
 				null,
@@ -52,7 +52,7 @@ namespace nbs_smart_wallet.Services
 			return cert;
 		}
 
-		private X509Certificate2 GetSigningCertificate() => GetSigningCertificateWith(_config.pfx_path);
+		private X509Certificate2 GetSigningCertificate() => GetSigningCertificateWith(_config.pfx_content);
 
 		public class ClientCredentialTokenResponse
 		{
