@@ -42,6 +42,15 @@ builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddScoped<RevolutProxy>();
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor |
+        Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto;
+
+    options.KnownIPNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
 var app = builder.Build();
 
@@ -55,6 +64,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseSession();
 
+app.UseForwardedHeaders();
 app.UseHttpsRedirection();
 app.UseRouting();
 
