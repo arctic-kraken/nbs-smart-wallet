@@ -5,15 +5,19 @@ using nbs_smart_wallet.Models;
 using Newtonsoft.Json;
 using nbs_smart_wallet.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Authorization;
+using Serilog;
 
 namespace nbs_smart_wallet.Controllers;
 
 public class HomeController : Controller
 {
     private RevolutProxy _revolutProxy;
-    public HomeController(RevolutProxy revolutProxy)
+    private ILogger<HomeController> _logger;
+    public HomeController(RevolutProxy revolutProxy, ILogger<HomeController> logger)
     {
         _revolutProxy = revolutProxy;
+        _logger = logger;
     }
 
     public IActionResult Index()
@@ -21,6 +25,7 @@ public class HomeController : Controller
         return View();
     }
 
+    //[AllowAnonymous]
     public IActionResult Landing()
     {
         return View();
@@ -41,6 +46,7 @@ public class HomeController : Controller
     [Route("/jwk/auth")]
     public ActionResult jwk()
     {
+        _logger.LogInformation("Authentication begun");
         try
         {
 			var response = JsonConvert.SerializeObject(_revolutProxy.GetJWK());
@@ -51,11 +57,21 @@ public class HomeController : Controller
 		} catch(Exception e)
         {
             // log e
+            _logger.LogError(e, e.Message);
+            Log.Information("testing 1234");
             return Problem(
                     detail: "Failed to get Json Web Key",
                     statusCode: StatusCodes.Status500InternalServerError
                 );
         }
+    }
+
+    [HttpGet]
+    [Route("/flush")]
+    public async Task<ActionResult> FlushLogs()
+    {
+        await Log.CloseAndFlushAsync();
+        return View("Landing");
     }
 
     [HttpGet]

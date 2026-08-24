@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using nbs_smart_wallet.Models;
 using nbs_smart_wallet.Services;
-using System.Reflection;
+using NpgsqlTypes;
+using Serilog;
+using Serilog.Sinks.PostgreSQL;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,11 +35,14 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddHttpContextAccessor();
 
-//builder.Services.AddDbContext<nbsDbContext>(options =>
-//{
-//    options.UseNpgsql(builder.Configuration["DefaultConnection"]);
-//});
+string? db_con_str = Environment.GetEnvironmentVariable("DefaultConnection");
+if (String.IsNullOrEmpty(db_con_str))
+    throw new Exception("Database connection string is null or empty");
 
+builder.Services.AddDbContext<nbsDbContext>(options =>
+{
+    options.UseNpgsql(db_con_str);
+});
 
 builder.Services.AddScoped<RevolutProxy>();
 
@@ -51,6 +56,38 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Clear();
 });
 builder.Services.AddHttpsRedirection(options => options.HttpsPort = 443);
+
+//Used columns (Key is a column name) 
+//Column type is writer's constructor parameter
+IDictionary<string, ColumnWriterBase> columnWriters = new Dictionary<string, ColumnWriterBase>
+{
+	{"message", new RenderedMessageColumnWriter(NpgsqlDbType.Text) },
+	{"message_template", new MessageTemplateColumnWriter(NpgsqlDbType.Text) },
+	{"level", new LevelColumnWriter(true, NpgsqlDbType.Varchar) },
+	{"raise_date", new TimestampColumnWriter(NpgsqlDbType.Timestamp) },
+	{"exception", new ExceptionColumnWriter(NpgsqlDbType.Text) },
+	{"properties", new LogEventSerializedColumnWriter(NpgsqlDbType.Jsonb) },
+	{"props_test", new PropertiesColumnWriter(NpgsqlDbType.Jsonb) },
+	{"machine_name", new SinglePropertyColumnWriter("MachineName", PropertyWriteMethod.ToString, NpgsqlDbType.Text, "l") }
+};
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .WriteTo.PostgreSQL(db_con_str, "logs", columnWriters, 
+                        schemaName: "public", needAutoCreateTable: true,
+                        batchSizeLimit: 30, period: TimeSpan.FromMinutes(2))
+    .CreateLogger();
+builder.Host.UseSerilog();
+Serilog.Debugging.SelfLog.Enable(msg => Console.WriteLine(msg));
+
+builder.Services.Configure<IHostApplicationLifetime>(options =>
+{
+	options.ApplicationStopping.Register(async () => {
+        Log.Information("Application is Stopping");
+        await Log.CloseAndFlushAsync(); 
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -71,14 +108,10 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
-//app.MapControllerRoute(
-//    name: "default",
-//    pattern: "{controller=Home}/{action=Index}/{id?}")
-//    .WithStaticAssets();
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Landing}/{id?}")
     .WithStaticAssets();
 
 app.Run();
+
