@@ -14,14 +14,19 @@
     --color-black: #000;
     --color-white: #fff;
     --spacing: 0.25rem;
-    --container-7xl: 80rem;
+    --text-lg: 1.125rem;
+    --text-lg--line-height: calc(1.75 / 1.125);
+    --text-2xl: 1.5rem;
+    --text-2xl--line-height: calc(2 / 1.5);
+    --font-weight-bold: 700;
     --ease-out: cubic-bezier(0, 0, 0.2, 1);
     --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
     --default-transition-duration: 150ms;
     --default-transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     --default-font-family: var(--font-sans);
     --default-mono-font-family: var(--font-mono);
-    --font-novatica: "Novatica";
+    --font-questrial: "Questrial", sans-serif;
+    --font-inter: "Inter", sans-serif;
   }
 }
 @layer base {
@@ -461,6 +466,9 @@
   .mt-5 {
     margin-top: calc(var(--spacing) * 5);
   }
+  .mt-10 {
+    margin-top: calc(var(--spacing) * 10);
+  }
   .mt-auto {
     margin-top: auto;
   }
@@ -481,6 +489,9 @@
   }
   .mb-5 {
     margin-bottom: calc(var(--spacing) * 5);
+  }
+  .mb-10 {
+    margin-bottom: calc(var(--spacing) * 10);
   }
   .mb-auto {
     margin-bottom: auto;
@@ -539,14 +550,14 @@
   .h-100 {
     height: calc(var(--spacing) * 100);
   }
+  .h-\[200px\] {
+    height: 200px;
+  }
   .h-auto {
     height: auto;
   }
   .min-h-lvh {
     min-height: 100lvh;
-  }
-  .w-20 {
-    width: calc(var(--spacing) * 20);
   }
   .w-25 {
     width: calc(var(--spacing) * 25);
@@ -562,6 +573,18 @@
   }
   .w-auto {
     width: auto;
+  }
+  .w-full {
+    width: 100%;
+  }
+  .max-w-1\/6 {
+    max-width: calc(1 / 6 * 100%);
+  }
+  .max-w-\[50em\] {
+    max-width: 50em;
+  }
+  .max-w-fit {
+    max-width: fit-content;
   }
   .flex-shrink {
     flex-shrink: 1;
@@ -616,6 +639,9 @@
   }
   .flex-wrap-reverse {
     flex-wrap: wrap-reverse;
+  }
+  .content-center {
+    align-content: center;
   }
   .items-center {
     align-items: center;
@@ -735,6 +761,9 @@
   }
   .bg-gray-700 {
     background-color: var(--color-gray-700);
+  }
+  .bg-gray-900 {
+    background-color: var(--color-gray-900);
   }
   .bg-gray-900\/50 {
     background-color: color-mix(in srgb, oklch(21% 0.034 264.665) 50%, transparent);
@@ -874,9 +903,6 @@
   .pb-5 {
     padding-bottom: calc(var(--spacing) * 5);
   }
-  .pl-2 {
-    padding-left: calc(var(--spacing) * 2);
-  }
   .text-center {
     text-align: center;
   }
@@ -904,8 +930,23 @@
   .align-top {
     vertical-align: top;
   }
-  .font-novatica {
-    font-family: var(--font-novatica);
+  .font-inter {
+    font-family: var(--font-inter);
+  }
+  .font-questrial {
+    font-family: var(--font-questrial);
+  }
+  .text-2xl {
+    font-size: var(--text-2xl);
+    line-height: var(--tw-leading, var(--text-2xl--line-height));
+  }
+  .text-lg {
+    font-size: var(--text-lg);
+    line-height: var(--tw-leading, var(--text-lg--line-height));
+  }
+  .font-bold {
+    --tw-font-weight: var(--font-weight-bold);
+    font-weight: var(--font-weight-bold);
   }
   .text-nowrap {
     text-wrap: nowrap;
@@ -999,6 +1040,11 @@
     --tw-ease: var(--ease-out);
     transition-timing-function: var(--ease-out);
   }
+  @media (hover: hover) {
+    .hover\:bg-gray-800:hover {
+      background-color: var(--color-gray-800);
+    }
+  }
 }
 @font-face {
   font-family: "Novatica";
@@ -1006,31 +1052,6 @@
   font-weight: 200 700;
   font-display: swap;
   src: url("/fonts/bc-novatica-cyr.otf") format("opentype");
-}
-html {
-  font-size: 14px;
-}
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-html {
-  position: relative;
-  min-height: 100%;
-}
-body {
-  margin-bottom: 60px;
-}
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
-}
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
 }
 @property --tw-rotate-x {
   syntax: "*";
@@ -1061,6 +1082,10 @@ body {
   syntax: "*";
   inherits: false;
   initial-value: solid;
+}
+@property --tw-font-weight {
+  syntax: "*";
+  inherits: false;
 }
 @property --tw-shadow {
   syntax: "*";
@@ -1199,6 +1224,7 @@ body {
       --tw-skew-y: initial;
       --tw-space-x-reverse: 0;
       --tw-border-style: solid;
+      --tw-font-weight: initial;
       --tw-shadow: 0 0 #0000;
       --tw-shadow-color: initial;
       --tw-shadow-alpha: 100%;

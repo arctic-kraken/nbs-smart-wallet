@@ -21,6 +21,11 @@ public class HomeController : Controller
         return View();
     }
 
+    public IActionResult Landing()
+    {
+        return View();
+    }
+
     public IActionResult Privacy()
     {
         return View();
@@ -55,7 +60,7 @@ public class HomeController : Controller
 
     [HttpGet]
     [Route("/auth")]
-    public async Task<ActionResult> auth()
+    public async Task<ActionResult> Auth()
     {
         var client_creds = await _revolutProxy.GetClientCredentialToken();
         var account_consent = await _revolutProxy.CreateAccountAccessConsent();

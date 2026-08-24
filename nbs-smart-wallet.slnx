@@ -1,3 +1,9 @@
 <Solution>
-  <Project Path="nbs-smart-wallet.csproj" />
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="nbs-smart-wallet.csproj">
+    <Platform Solution="*|x86" Project="x86" />
+  </Project>
 </Solution>

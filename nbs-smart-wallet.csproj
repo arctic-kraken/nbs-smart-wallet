@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>nbs_smart_wallet</RootNamespace>
     <UserSecretsId>2f03f7f2-1723-4566-933e-6e37aa480220</UserSecretsId>
+    <Platforms>AnyCPU;x86</Platforms>
   </PropertyGroup>
 
   <ItemGroup>

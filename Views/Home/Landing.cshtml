@@ -1,0 +1,36 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Wallet</title>
+    <script type="importmap"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Questrial&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site_tw.css" asp-append-version="true" />
+</head>
+<body class="font-questrial m-auto max-w-[50em] bg-gray-700 text-lg text-white">
+    <header>
+        <div class="flex h-[200px] w-full flex-wrap content-center">
+            <h1 class="font-inter flex w-full justify-center text-2xl">SMART WALLET</h1>
+        </div>
+    </header>
+    <main class="flex justify-center">
+        <div class="flex max-w-fit flex-wrap content-center justify-center rounded bg-white p-2 text-black">
+            <a class="" asp-action="Auth" asp-controller="Home" asp-area="">Log in with Revolut</a>
+        </div>
+    </main>
+    @* <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false) *@
+</body>
+</html>

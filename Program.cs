@@ -7,8 +7,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration
     .AddJsonFile("appsettings.json")
-    //.AddEnvironmentVariables()
-    .AddUserSecrets(Assembly.GetExecutingAssembly(), true);
+    .AddEnvironmentVariables();
+    //.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
 var revolutConfig = Environment.GetEnvironmentVariable("RevolutProxyConfig");
 
@@ -17,7 +17,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient("revolut", c => { })
     .ConfigurePrimaryHttpMessageHandler(() =>
     {
-        var content = Environment.GetEnvironmentVariable("pfx_content");
+        var content = Environment.GetEnvironmentVariable("pfx_content") 
+            ?? throw new Exception("pfx_content environment variable not set");
         var handler = RevolutProxy.GetDefaultRevolutHandler(content);
 		return handler;
     });
@@ -70,10 +71,14 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
+//app.MapControllerRoute(
+//    name: "default",
+//    pattern: "{controller=Home}/{action=Index}/{id?}")
+//    .WithStaticAssets();
+
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}")
+    pattern: "{controller=Home}/{action=Landing}/{id?}")
     .WithStaticAssets();
-
 
 app.Run();

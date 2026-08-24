@@ -185,7 +185,7 @@ namespace nbs_smart_wallet.Services
 				{
 					{ "scope", "accounts" },
 					{ "state", "somestate" },
-					{ "client_id", _config.client_id },
+					{ "client_id", $"{tunnelUrl}{_config.client_id}" },
 					{ "response_type", "code id_token" },
 					{ "redirect_uri", _config.auth_redirect_endpoint },
 					{ "claims", new Dictionary<string, object>
@@ -211,9 +211,15 @@ namespace nbs_smart_wallet.Services
 
 		public string GetAuthUrl(Guid consentId)
 		{
-			var hostname = _accessor.HttpContext?.Request.Host.Value;
+			var tunnelUrl = Environment.GetEnvironmentVariable("VS_TUNNEL_URL");
+			string hostname = "";
+			if (String.IsNullOrEmpty(tunnelUrl))
+				hostname = $"https://{_accessor.HttpContext?.Request.Host.Value}/";
+			else
+				hostname = tunnelUrl;
+
 			var coder = UrlEncoder.Create();
-			return $"{_config.url}/ui/index.html?response_type=code%20id_token&scope=accounts&redirect_uri={$"https://{hostname}/{_config.auth_redirect_endpoint}"}&client_id={_config.client_id}&request={GetSignedJWTFor(consentId)}";
+			return $"{_config.url}/ui/index.html?response_type=code%20id_token&scope=accounts&redirect_uri={$"{hostname}{_config.auth_redirect_endpoint}"}&client_id={_config.client_id}&request={GetSignedJWTFor(consentId)}";
 		}
 		
 		public nbs_smart_wallet.Models.JsonWebKey GetJWK() => _config.jwk;

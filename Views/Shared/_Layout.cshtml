@@ -5,16 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - nbs_smart_wallet</title>
     <script type="importmap"></script>
+   
+    @* <link rel="stylesheet" href="~/nbs_smart_wallet.styles.css" asp-append-version="true" /> *@
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Questrial&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site_tw.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/nbs_smart_wallet.styles.css" asp-append-version="true" />
     <!-- npx tailwindcss/cli -i .\wwwroot\css\site.css -o .\wwwroot\css\site_tw.css -->
     <!-- bg-[#004A99] bg-[#ED7723] -->
 </head>
-<body class="font-novatica bg-gray-700 text-white">
-    <header class="spac relative float-left flex min-h-lvh w-20 flex-col bg-[#ED7723]">
-        <div class="flex flex-col space-x-4 pl-2">
-            <a class="" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-            <a class="" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+<body class="font-questrial bg-gray-700 text-lg text-white" >
+    <header class="spac relative float-left flex min-h-lvh w-full max-w-1/6 flex-col bg-gray-900">
+        <div class="mt-10 mb-10">
+            <h1 class="font-inter flex justify-center font-bold">SMART WALLET</h1>
+        </div>
+        <div class="flex w-full flex-col content-center space-x-4 p-2">
+            <div class="w-full rounded p-2 hover:bg-gray-800">
+                <a class="" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+            </div>
+            <div class="w-full rounded p-2 hover:bg-gray-800">
+                <a class="" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            </div>
         </div>
         
     </header>

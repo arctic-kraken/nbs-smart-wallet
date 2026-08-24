@@ -12,9 +12,11 @@
     --font-novatica: "Novatica";
     --color-nbs-blue: #004A99;
     --color-nbs-orange: #ED7723;
+    --font-questrial: "Questrial", sans-serif;
+    --font-inter: "Inter", sans-serif;
 }
 
-html {
+/*html {
   font-size: 14px;
 }
 
@@ -35,6 +37,7 @@ html {
 
 body {
   margin-bottom: 60px;
+  font-family: "Questrial", sans-serif;
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
@@ -44,4 +47,4 @@ body {
 
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
-}
+}*/
