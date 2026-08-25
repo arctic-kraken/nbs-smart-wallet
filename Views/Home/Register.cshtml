@@ -1,14 +1,14 @@
 ﻿@{
     Layout = "";
 }
-@model nbs_smart_wallet.Models.Authentication.Login;
+@model nbs_smart_wallet.Models.Authentication.Register;
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Smart Wallet</title>
+    <title>Register</title>
     <script type="importmap"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,30 +22,30 @@
         </div>
     </header>
     <main class="flex justify-center">
-        @* <div class="flex max-w-fit flex-wrap content-center justify-center rounded bg-white p-2 text-black">
-            <a class="" asp-action="Auth" asp-controller="Home" asp-area="">Log in with Revolut</a>
-        </div> *@
         <div class="w-full max-w-[20em] rounded bg-gray-800 p-5">
-            <form class="grid" asp-action="Login" asp-controller="Home" method="post">
-                <div class="row-span-4 grid w-full grid-rows-4 gap-2">
+            <form class="grid" asp-action="Register" asp-controller="Home" method="post">
+                <div class="row-span-5 grid w-full grid-rows-5 gap-1">
                     <div class="content-center">
                         <input class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" asp-for="@Model.Username" type="text" placeholder="Username" />
+                    </div>
+                    <div class="content-center">
+                        <input class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" asp-for="@Model.Email" type="email" placeholder="E-mail" />
+                    </div>
+                    <div class="content-center">
+                        <input class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" asp-for="@Model.Password" type="password" placeholder="Password" />
                     </div>
                     <div class="content-center">
                         <input class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" asp-for="@Model.Password" type="password" placeholder="Password" />
                     </div>
                     <div class="flex justify-center">
                         <button class="max-w-fit rounded bg-white p-2 text-black" type="submit">
-                            Log-in
+                            Register
                         </button>
-                    </div>
-                    <div class="flex content-center justify-center p-2">
-                        <a class="content-center text-sm text-white underline" asp-action="Register" asp-controller="Home">New to Smart Wallet? Register here.</a>
                     </div>
                 </div>
             </form>
         </div>
-        
+
     </main>
 </body>
 </html>

@@ -1,9 +1,15 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using nbs_smart_wallet.Models;
+using nbs_smart_wallet.Models.Authentication;
 using nbs_smart_wallet.Services;
+using Newtonsoft.Json;
 using NpgsqlTypes;
 using Serilog;
 using Serilog.Sinks.PostgreSQL;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +18,7 @@ builder.Configuration
     .AddEnvironmentVariables();
     //.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
 
-var revolutConfig = Environment.GetEnvironmentVariable("RevolutProxyConfig");
+//var revolutConfig = Environment.GetEnvironmentVariable("RevolutProxyConfig");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -43,6 +49,39 @@ builder.Services.AddDbContext<nbsDbContext>(options =>
 {
     options.UseNpgsql(db_con_str);
 });
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+    .AddEntityFrameworkStores<nbsDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+    {
+		var appJWT_env = Environment.GetEnvironmentVariable("AppJWT");
+        if (String.IsNullOrEmpty(appJWT_env))
+            throw new Exception("AppJWT in config was found to be null or empty");
+
+        var appJWT = JsonConvert.DeserializeObject<AppJWT>(appJWT_env);
+        if (appJWT == null)
+			throw new Exception("Failed to Deserialize AppJWT");
+
+		options.SaveToken = true;
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters()
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidAudience = appJWT.aud,
+            ValidIssuer = appJWT.iss,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appJWT.signing_key))
+        };
+    }
+);
 
 builder.Services.AddScoped<RevolutProxy>();
 

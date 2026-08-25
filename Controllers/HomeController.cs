@@ -1,12 +1,18 @@
 using JsonConverter.Newtonsoft.Json;
-using System.Diagnostics;
-using Microsoft.AspNetCore.Mvc;
-using nbs_smart_wallet.Models;
-using Newtonsoft.Json;
-using nbs_smart_wallet.Services;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using nbs_smart_wallet.Models;
+using nbs_smart_wallet.Models.Authentication;
+using nbs_smart_wallet.Services;
+using Newtonsoft.Json;
 using Serilog;
+using System.Diagnostics;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace nbs_smart_wallet.Controllers;
 
@@ -14,6 +20,7 @@ public class HomeController : Controller
 {
     private RevolutProxy _revolutProxy;
     private ILogger<HomeController> _logger;
+    private UserManager<ApplicationUser> _userManager;
     public HomeController(RevolutProxy revolutProxy, ILogger<HomeController> logger)
     {
         _revolutProxy = revolutProxy;
@@ -29,6 +36,73 @@ public class HomeController : Controller
     public IActionResult Landing()
     {
         return View();
+    }
+
+    public IActionResult Register()
+    {
+        return View();
+    }
+
+    [HttpPost]
+	public async Task<ActionResult> Register(Register request)
+	{
+        // activation email etc etc in the future will be nice
+        var user = await _userManager.FindByEmailAsync(request.Email);
+        if (user != null)
+			return StatusCode(StatusCodes.Status500InternalServerError);
+
+		// clean strings!
+		var newUser = new ApplicationUser
+        {
+            Email = request.Email,
+            UserName = request.Username,
+            SecurityStamp = Guid.NewGuid().ToString(),
+        };
+
+        var result = await _userManager.CreateAsync(newUser, request.Password);
+        if (!result.Succeeded)
+            return StatusCode(StatusCodes.Status500InternalServerError);
+
+		return RedirectToAction("Landing");
+	}
+
+	[HttpPost]
+    public async Task<ActionResult> Login(Login request)
+    {
+        var user = await _userManager.FindByNameAsync(request.Username);
+        if (user != null && await _userManager.CheckPasswordAsync(user, request.Password))
+        {
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+			var authClaims = new List<Claim>
+				{
+					new Claim(ClaimTypes.Name, user.UserName),
+					new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+				};
+
+			//foreach (var userRole in userRoles)
+			//{
+			//	authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+			//}
+
+			//var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
+
+			//var token = new JwtSecurityToken(
+			//	issuer: _configuration["JWT:ValidIssuer"],
+			//	audience: _configuration["JWT:ValidAudience"],
+			//	expires: DateTime.Now.AddHours(3),
+			//	claims: authClaims,
+			//	signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+			//	);
+
+			//return Ok(new
+			//{
+			//	token = new JwtSecurityTokenHandler().WriteToken(token),
+			//	expiration = token.ValidTo
+			//});
+		}
+
+        return View("Index");
     }
 
     public IActionResult Privacy()
@@ -56,22 +130,12 @@ public class HomeController : Controller
 			return Ok(response);
 		} catch(Exception e)
         {
-            // log e
-            _logger.LogError(e, e.Message);
-            Log.Information("testing 1234");
+            Log.Error(e, "{Timestamp:HH:mm} [{Level}] {Message}{NewLine}{Exception}");
             return Problem(
                     detail: "Failed to get Json Web Key",
                     statusCode: StatusCodes.Status500InternalServerError
                 );
         }
-    }
-
-    [HttpGet]
-    [Route("/flush")]
-    public async Task<ActionResult> FlushLogs()
-    {
-        await Log.CloseAndFlushAsync();
-        return View("Landing");
     }
 
     [HttpGet]
