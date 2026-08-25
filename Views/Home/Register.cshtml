@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Questrial&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site_tw.css" asp-append-version="true" />
 </head>
-<body class="font-questrial m-auto max-w-[50em] bg-gray-700 text-lg text-white">
+<body class="font-questrial m-auto min-h-[80vh] max-w-[50em] bg-[url(/img/dylan-taylor-thousand-island-lake.jpg)] bg-gray-700 bg-cover bg-center bg-no-repeat text-lg text-white">
     <header>
         <div class="flex h-[200px] w-full flex-wrap content-center">
             <h1 class="font-inter flex w-full justify-center text-2xl font-bold">SMART WALLET</h1>
@@ -24,7 +24,7 @@
     <main class="flex justify-center">
         <div class="w-full max-w-[20em] rounded bg-gray-800 p-5">
             <form class="grid" asp-action="Register" asp-controller="Home" method="post">
-                <div class="row-span-5 grid w-full grid-rows-5 gap-1">
+                <div class="row-span-6 grid w-full grid-rows-6 gap-1">
                     <div class="content-center">
                         <input class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" asp-for="@Model.Username" type="text" placeholder="Username" />
                     </div>
@@ -41,6 +41,9 @@
                         <button class="max-w-fit rounded bg-white p-2 text-black hover:cursor-pointer" type="submit">
                             Register
                         </button>
+                    </div>
+                    <div class="flex content-center justify-center p-2 hover:cursor-pointer">
+                        <a class="content-center text-sm text-white underline" asp-action="Landing" asp-controller="Home">Already registered? Log-in here.</a>
                     </div>
                 </div>
             </form>

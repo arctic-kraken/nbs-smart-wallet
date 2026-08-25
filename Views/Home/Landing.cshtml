@@ -15,7 +15,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Questrial&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="~/css/site_tw.css" asp-append-version="true" />
 </head>
-<body class="font-questrial m-auto max-w-[50em] bg-gray-700 text-lg text-white">
+@* bg-gray-700 *@
+<body class="font-questrial m-auto min-h-[80vh] max-w-[50em] bg-[url(/img/dylan-taylor-thousand-island-lake.jpg)] bg-cover bg-center bg-no-repeat text-lg text-white">
     <header>
         <div class="flex h-[200px] w-full flex-wrap content-center">
             <h1 class="font-inter flex w-full justify-center text-2xl font-bold">SMART WALLET</h1>
@@ -47,5 +48,12 @@
         </div>
         
     </main>
+
+    <!-- have footer only on landing webpage -->
+    @* <footer class="align relative bottom-0 bg-gray-900/50">
+        <div class="container">
+            &copy; 2026 - nbs_smart_wallet 
+        </div>
+    </footer> *@
 </body>
 </html>

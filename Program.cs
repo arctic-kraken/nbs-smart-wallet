@@ -52,29 +52,6 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<nbsDbContext>()
     .AddDefaultTokenProviders();
 
-//.AddJwtBearer(options =>
-//    {
-//		var appJWT_env = Environment.GetEnvironmentVariable("AppJWT");
-//        if (String.IsNullOrEmpty(appJWT_env))
-//            throw new Exception("AppJWT in config was found to be null or empty");
-
-//        var appJWT = JsonConvert.DeserializeObject<AppJWT>(appJWT_env);
-//        if (appJWT == null)
-//			throw new Exception("Failed to Deserialize AppJWT");
-
-//		options.SaveToken = true;
-//        options.RequireHttpsMetadata = false;
-//        options.TokenValidationParameters = new TokenValidationParameters()
-//        {
-//            ValidateIssuer = true,
-//            ValidateAudience = true,
-//            ValidAudience = appJWT.aud,
-//            ValidIssuer = appJWT.iss,
-//            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appJWT.signing_key))
-//        };
-//    }
-//);
-
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Cookie.HttpOnly = true;
