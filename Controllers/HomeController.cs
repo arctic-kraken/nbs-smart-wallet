@@ -16,15 +16,19 @@ using System.Text;
 
 namespace nbs_smart_wallet.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
     private RevolutProxy _revolutProxy;
     private ILogger<HomeController> _logger;
+    private SignInManager<ApplicationUser> _signInManager;
     private UserManager<ApplicationUser> _userManager;
-    public HomeController(RevolutProxy revolutProxy, ILogger<HomeController> logger)
+    public HomeController(RevolutProxy revolutProxy, ILogger<HomeController> logger, SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
     {
         _revolutProxy = revolutProxy;
         _logger = logger;
+        _signInManager = signInManager;
+        _userManager = userManager;
     }
 
     public IActionResult Index()
@@ -32,18 +36,20 @@ public class HomeController : Controller
         return View();
     }
 
-    //[AllowAnonymous]
+    [AllowAnonymous]
     public IActionResult Landing()
     {
         return View();
     }
 
+    [AllowAnonymous]
     public IActionResult Register()
     {
         return View();
     }
 
     [HttpPost]
+    [AllowAnonymous]
 	public async Task<ActionResult> Register(Register request)
 	{
         // activation email etc etc in the future will be nice
@@ -60,6 +66,7 @@ public class HomeController : Controller
         };
 
         var result = await _userManager.CreateAsync(newUser, request.Password);
+        // if fail, go back to register page and show why it failed
         if (!result.Succeeded)
             return StatusCode(StatusCodes.Status500InternalServerError);
 
@@ -67,44 +74,20 @@ public class HomeController : Controller
 	}
 
 	[HttpPost]
+    [AllowAnonymous]
     public async Task<ActionResult> Login(Login request)
     {
-        var user = await _userManager.FindByNameAsync(request.Username);
-        if (user != null && await _userManager.CheckPasswordAsync(user, request.Password))
-        {
-            var userRoles = await _userManager.GetRolesAsync(user);
+        var rememberMe = false;
+        var result = await _signInManager.PasswordSignInAsync(
+            request.Username, request.Password, isPersistent: rememberMe, lockoutOnFailure: false);
 
-			var authClaims = new List<Claim>
-				{
-					new Claim(ClaimTypes.Name, user.UserName),
-					new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-				};
+        if (result.Succeeded)
+            return RedirectToAction("Index", "Home");
 
-			//foreach (var userRole in userRoles)
-			//{
-			//	authClaims.Add(new Claim(ClaimTypes.Role, userRole));
-			//}
-
-			//var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Secret"]));
-
-			//var token = new JwtSecurityToken(
-			//	issuer: _configuration["JWT:ValidIssuer"],
-			//	audience: _configuration["JWT:ValidAudience"],
-			//	expires: DateTime.Now.AddHours(3),
-			//	claims: authClaims,
-			//	signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
-			//	);
-
-			//return Ok(new
-			//{
-			//	token = new JwtSecurityTokenHandler().WriteToken(token),
-			//	expiration = token.ValidTo
-			//});
-		}
-
-        return View("Index");
+        return View("Landing");
     }
 
+    [AllowAnonymous]
     public IActionResult Privacy()
     {
         return View();
@@ -118,6 +101,7 @@ public class HomeController : Controller
 
     [HttpGet]
     [Route("/jwk/auth")]
+    [AllowAnonymous]
     public ActionResult jwk()
     {
         _logger.LogInformation("Authentication begun");
@@ -150,6 +134,7 @@ public class HomeController : Controller
 
 	[HttpGet]
     [Route("/jwk/auth/callback")]
+    [AllowAnonymous]
     public async Task<ActionResult> redirect_target(string code, string id_token, string state)
     {
         Debug.WriteLine($"{code} {id_token} {state}");

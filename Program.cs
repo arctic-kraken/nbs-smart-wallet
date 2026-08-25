@@ -41,7 +41,8 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddHttpContextAccessor();
 
-string? db_con_str = Environment.GetEnvironmentVariable("DefaultConnection");
+//string? db_con_str = Environment.GetEnvironmentVariable("DefaultConnection");
+string? db_con_str = "Host=localhost;Username=postgres;Password=Nolan32767;Database=nbs-smart-wallet";
 if (String.IsNullOrEmpty(db_con_str))
     throw new Exception("Database connection string is null or empty");
 
@@ -50,6 +51,7 @@ builder.Services.AddDbContext<nbsDbContext>(options =>
     options.UseNpgsql(db_con_str);
 });
 
+builder.Services.AddAuthorization();
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<nbsDbContext>()
     .AddDefaultTokenProviders();
@@ -144,6 +146,7 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthorization();
+app.UseAuthentication();
 
 app.MapStaticAssets();
 
