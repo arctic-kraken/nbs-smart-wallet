@@ -1,6 +1,7 @@
 ﻿using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using nbs_smart_wallet.Models;
+using nbs_smart_wallet.Models.Revolut;
 using Newtonsoft.Json;
 using System.Net;
 using System.Net.Http.Headers;
@@ -57,7 +58,7 @@ namespace nbs_smart_wallet.Services
 
 		private X509Certificate2 GetSigningCertificate() => GetSigningCertificateWith(Environment.GetEnvironmentVariable("pfx_content") ?? "");
 
-		public class ClientCredentialTokenResponse
+		public class ClientCredentialTokenResponse // change to Dictionary
 		{
 			public string access_token { get; set; }
 			public string token_type { get; set; }
@@ -89,56 +90,10 @@ namespace nbs_smart_wallet.Services
 			return true;
 		}
 
-		public class AccountAccessConsentRequestBody
-		{
-			public Data Data { get; set; } = new Data();
-			public Risk Risk { get; set; } = new Risk();
-		}
-
-		public class Data
-		{
-			public string Status { get; set; } = string.Empty;
-			public DateTime StatusUpdateDateTime { get; set; }
-			public DateTime CreationDateTime { get; set; }
-			public List<string> Permissions { get; set; } = new List<string>
-				{
-					"ReadAccountsBasic",
-					"ReadAccountsDetail",
-				};
-			public DateTime ExpirationDateTime { get; set; }
-			public DateTime TransactionFromDateTime { get; set; }
-			public DateTime TransactionToDateTime { get; set; }
-			public Guid ConsentId { get; set; }
-			public List<AppAccount> Account { get; set; } = new List<AppAccount>();
-
-		}
-		public class Risk
-		{
-
-		}
-
-		public class Links 
-		{
-			public string Self { get; set; } = string.Empty;
-		}
-
-		public class Meta
-		{
-			public int TotalPages { get; set; }
-		}
-
-		public class AccountAccessConsentResponse
-		{
-			public Data Data { get; set; } = new Data();
-			public Risk Risk { get; set; } = new Risk();
-			public Links Links { get; set; } = new Links();
-			public Meta Meta { get; set; } = new Meta();
-		}
-
-		public async Task<AccountAccessConsentResponse> CreateAccountAccessConsent()
+		public async Task<RevolutPayload> CreateAccountAccessConsent()
 		{
 			if (String.IsNullOrEmpty(client_credential_access_token))
-				return new AccountAccessConsentResponse();
+				return new RevolutPayload();
 
 			string url = $"{_config.auth_url}/account-access-consents";
 
@@ -147,7 +102,7 @@ namespace nbs_smart_wallet.Services
 			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", client_credential_access_token);
 			request.Content?.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
-			var body = new AccountAccessConsentRequestBody();
+			var body = new RevolutPayload();
 			body.Data.ExpirationDateTime = DateTime.Now.AddHours(1.0);
 			body.Data.TransactionFromDateTime = DateTime.Now.AddMonths(-3);
 			body.Data.TransactionToDateTime = DateTime.Now;
@@ -157,7 +112,7 @@ namespace nbs_smart_wallet.Services
 			using var response = await _client.SendAsync(request);
 			response.EnsureSuccessStatusCode();
 			string content = await response.Content.ReadAsStringAsync();
-			var account_access_consent = JsonConvert.DeserializeObject<AccountAccessConsentResponse>(content);
+			var account_access_consent = JsonConvert.DeserializeObject<RevolutPayload>(content);
 			// log 
 			if (account_access_consent == null)
 				throw new ArgumentNullException();
@@ -224,7 +179,7 @@ namespace nbs_smart_wallet.Services
 		
 		public nbs_smart_wallet.Models.JsonWebKey GetJWK() => _config.jwk;
 
-		public class AccessTokenResponse
+		public class AccessTokenResponse // change to Dictionary
 		{
 			public string access_token { get; set; } = string.Empty;
 			public Guid access_token_id { get; set; }
@@ -267,6 +222,37 @@ namespace nbs_smart_wallet.Services
 			return true;
 		}
 
+		//public async Task<bool> RefreshAccessToken()
+		//{
+		//	var coder = UrlEncoder.Create();
+		//	string url = $"{_config.auth_url}/token";
+
+		//	HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
+		//	request.Content?.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+		//	var form = new Dictionary<string, string>
+		//	{
+		//		{ "grant_type", "authorization_code" },
+		//		{ "code", code },
+		//		{ "client_id", _config.client_id},
+		//	};
+		//	var formEncoded = new FormUrlEncodedContent(form);
+		//	request.Content = formEncoded;
+
+		//	using var response = await _client.SendAsync(request);
+		//	//response.EnsureSuccessStatusCode();
+		//	string content = await response.Content.ReadAsStringAsync();
+		//	// log 
+		//	var cookie_jar = new CookieContainer();
+		//	var token_response = JsonConvert.DeserializeObject<AccessTokenResponse>(content);
+		//	if (token_response == null)
+		//		return false;
+
+		//	// remember about cookie security
+		//	AddTokenCookies(token_response.access_token, token_response.refresh_token);
+
+		//	return true;
+		//}
+
 		private void AddTokenCookies(string? access_token, string? refresh_token)
 		{
 			var options = new CookieOptions
@@ -290,36 +276,29 @@ namespace nbs_smart_wallet.Services
 			var a_token = _accessor.HttpContext.Request.Cookies.SingleOrDefault(x => x.Key == _config.access_token_cookie_name);
 			
 			return a_token.Value;
-		} 
-
-		public class AppAccount
-		{
-			public Guid AccountId { get; set; }
-			public string Currency { get; set; } = string.Empty;
-			public string AccountType { get; set; } = string.Empty;
-			public string AccountSubType { get; set; } = string.Empty;
-			public string Nickname { get; set; } = string.Empty;
-			public List<BankAccount> Account = new List<BankAccount>();
 		}
 
-		public class BankAccount
+		private string GetRefreshTokenFromCookie()
 		{
-			public string SchemeName { get; set; } = string.Empty;
-			public string Identification { get; set; } = string.Empty;
-			public string Name { get; set; } = string.Empty;
-			public string SecondaryIdentification { get; set; } = string.Empty;
+			if (_accessor.HttpContext == null)
+				return string.Empty;
+			var a_token = _accessor.HttpContext.Request.Cookies.SingleOrDefault(x => x.Key == _config.refresh_token_cookie_name);
 
+			return a_token.Value;
 		}
 
-		public class AccountResponse
+		public bool IsLoggedIntoRevolut()
 		{
-			public Data Data { get; set; } = new Data();
-			public Links Links { get; set; } = new Links();
-			public Meta Meta { get; set; } = new Meta();
+			var token = GetRefreshTokenFromCookie();
+			return String.IsNullOrEmpty(token) ? false : true;
 		}
 
 		public async Task<List<AppAccount>> GetAccounts()
 		{
+			// try access token
+			// get access token if expired
+			// if forbidden
+			
 			var token = GetAccessTokenFromCookie();
 			if (String.IsNullOrEmpty(token))
 				throw new InvalidOperationException("access_token is empty");
@@ -335,7 +314,7 @@ namespace nbs_smart_wallet.Services
 			using var response = await _client.SendAsync(request);
 			//response.EnsureSuccessStatusCode();
 			string content = await response.Content.ReadAsStringAsync();
-			var accounts = JsonConvert.DeserializeObject<AccountResponse>(content);
+			var accounts = JsonConvert.DeserializeObject<RevolutPayload>(content);
 			// log 
 			if (accounts == null)
 				throw new ArgumentNullException();

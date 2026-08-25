@@ -556,6 +556,9 @@
     width: calc(var(--spacing) * 6);
     height: calc(var(--spacing) * 6);
   }
+  .h-5 {
+    height: calc(var(--spacing) * 5);
+  }
   .h-25 {
     height: calc(var(--spacing) * 25);
   }
