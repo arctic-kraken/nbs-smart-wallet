@@ -315,6 +315,9 @@
   .col-auto {
     grid-column: auto;
   }
+  .row-span-2 {
+    grid-row: span 2 / span 2;
+  }
   .row-span-4 {
     grid-row: span 4 / span 4;
   }
@@ -564,6 +567,12 @@
   .h-auto {
     height: auto;
   }
+  .h-full {
+    height: 100%;
+  }
+  .min-h-\[50em\] {
+    min-height: 50em;
+  }
   .min-h-lvh {
     min-height: 100lvh;
   }
@@ -632,6 +641,9 @@
   }
   .resize {
     resize: both;
+  }
+  .grid-rows-2 {
+    grid-template-rows: repeat(2, minmax(0, 1fr));
   }
   .grid-rows-4 {
     grid-template-rows: repeat(4, minmax(0, 1fr));
@@ -1071,6 +1083,9 @@
     transition-timing-function: var(--ease-out);
   }
   @media (hover: hover) {
+    .hover\:cursor-pointer:hover {
+      cursor: pointer;
+    }
     .hover\:bg-gray-800:hover {
       background-color: var(--color-gray-800);
     }

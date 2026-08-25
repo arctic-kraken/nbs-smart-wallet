@@ -1,18 +1,12 @@
-using JsonConverter.Newtonsoft.Json;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using nbs_smart_wallet.Models;
 using nbs_smart_wallet.Models.Authentication;
 using nbs_smart_wallet.Services;
 using Newtonsoft.Json;
 using Serilog;
 using System.Diagnostics;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
 namespace nbs_smart_wallet.Controllers;
 
@@ -48,7 +42,21 @@ public class HomeController : Controller
         return View();
     }
 
-    [HttpPost]
+	[HttpGet]
+	public IActionResult LogOut()
+	{
+        return View();
+	}
+
+	[HttpPost]
+	public async Task<ActionResult> LogOutConfirm()
+	{
+        await _signInManager.SignOutAsync();
+
+		return RedirectToAction("Landing");
+	}
+
+	[HttpPost]
     [AllowAnonymous]
 	public async Task<ActionResult> Register(Register request)
 	{

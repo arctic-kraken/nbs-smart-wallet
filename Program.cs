@@ -16,9 +16,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration
     .AddJsonFile("appsettings.json")
     .AddEnvironmentVariables();
-    //.AddUserSecrets(Assembly.GetExecutingAssembly(), true);
-
-//var revolutConfig = Environment.GetEnvironmentVariable("RevolutProxyConfig");
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -41,8 +38,7 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddHttpContextAccessor();
 
-//string? db_con_str = Environment.GetEnvironmentVariable("DefaultConnection");
-string? db_con_str = "Host=localhost;Username=postgres;Password=Nolan32767;Database=nbs-smart-wallet";
+string? db_con_str = Environment.GetEnvironmentVariable("DefaultConnection");
 if (String.IsNullOrEmpty(db_con_str))
     throw new Exception("Database connection string is null or empty");
 
@@ -56,34 +52,35 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<nbsDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddAuthentication(options =>
+//.AddJwtBearer(options =>
+//    {
+//		var appJWT_env = Environment.GetEnvironmentVariable("AppJWT");
+//        if (String.IsNullOrEmpty(appJWT_env))
+//            throw new Exception("AppJWT in config was found to be null or empty");
+
+//        var appJWT = JsonConvert.DeserializeObject<AppJWT>(appJWT_env);
+//        if (appJWT == null)
+//			throw new Exception("Failed to Deserialize AppJWT");
+
+//		options.SaveToken = true;
+//        options.RequireHttpsMetadata = false;
+//        options.TokenValidationParameters = new TokenValidationParameters()
+//        {
+//            ValidateIssuer = true,
+//            ValidateAudience = true,
+//            ValidAudience = appJWT.aud,
+//            ValidIssuer = appJWT.iss,
+//            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appJWT.signing_key))
+//        };
+//    }
+//);
+
+builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-    {
-		var appJWT_env = Environment.GetEnvironmentVariable("AppJWT");
-        if (String.IsNullOrEmpty(appJWT_env))
-            throw new Exception("AppJWT in config was found to be null or empty");
-
-        var appJWT = JsonConvert.DeserializeObject<AppJWT>(appJWT_env);
-        if (appJWT == null)
-			throw new Exception("Failed to Deserialize AppJWT");
-
-		options.SaveToken = true;
-        options.RequireHttpsMetadata = false;
-        options.TokenValidationParameters = new TokenValidationParameters()
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidAudience = appJWT.aud,
-            ValidIssuer = appJWT.iss,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appJWT.signing_key))
-        };
-    }
-);
+    options.Cookie.HttpOnly = true;
+    options.ExpireTimeSpan = TimeSpan.FromDays(1);
+    options.LoginPath = "/";
+});
 
 builder.Services.AddScoped<RevolutProxy>();
 
@@ -145,8 +142,8 @@ app.UseForwardedHeaders();
 app.UseHttpsRedirection();
 app.UseRouting();
 
-app.UseAuthorization();
 app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapStaticAssets();
 

@@ -20,17 +20,26 @@
             <h1 class="font-inter flex justify-center font-bold">SMART WALLET</h1>
         </div>
         <div class="flex w-full flex-col content-center space-x-4 p-2">
-            <div class="w-full rounded p-2 hover:bg-gray-800">
-                <a class="" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-            </div>
-            <div class="w-full rounded p-2 hover:bg-gray-800">
-                <a class="" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-            </div>
+            <a class="" asp-controller="Home" asp-action="Index">
+                <div class="w-full rounded p-2 hover:cursor-pointer hover:bg-gray-800">
+                    Home
+                </div>
+            </a>
+            <a class="" asp-controller="Home" asp-action="Privacy">
+                <div class="w-full rounded p-2 hover:cursor-pointer hover:bg-gray-800">
+                    Privacy
+                </div>
+            </a>
+            <a class="" asp-controller="Home" asp-action="LogOut">
+                <div class="w-full rounded p-2 hover:cursor-pointer hover:bg-gray-800">
+                    Log-out
+                </div>
+            </a>
         </div>
         
     </header>
     <div class="relative flex flex-col items-center justify-center">
-        <main role="main" class="" style="margin: 0em auto">
+        <main role="main" class="h-full" style="margin: 0em auto">
             @RenderBody()
         </main>
     </div>
