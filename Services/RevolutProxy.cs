@@ -17,10 +17,9 @@ namespace nbs_smart_wallet.Services
 		private IHttpContextAccessor _accessor;
 		private RevolutProxyConfig _config;
 		private string client_credential_access_token = string.Empty;
-		private string client_credential_refresh_token = string.Empty;
-		
+		private AppService _app;
 
-		public RevolutProxy(IHttpClientFactory clientFactory, IHttpContextAccessor contextAccessor)
+		public RevolutProxy(IHttpClientFactory clientFactory, IHttpContextAccessor contextAccessor, AppService appService)
 		{
 			_client = clientFactory.CreateClient("revolut");
 			_accessor = contextAccessor;
@@ -29,6 +28,8 @@ namespace nbs_smart_wallet.Services
 				throw new Exception("Failed to load Revolut Proxy Config at HOME");
 			var config = JsonConvert.DeserializeObject<RevolutProxyConfig>(config_str);
 			_config = config ?? throw new Exception("Revolut Proxy Config has not been deserialized because a null was given");
+
+			_app = appService;
 		}
 
 		public static HttpClientHandler GetDefaultRevolutHandler(string pfx_contents)
@@ -57,13 +58,6 @@ namespace nbs_smart_wallet.Services
 
 		private X509Certificate2 GetSigningCertificate() => GetSigningCertificateWith(Environment.GetEnvironmentVariable("pfx_content") ?? "");
 
-		public class ClientCredentialTokenResponse // change to Dictionary
-		{
-			public string access_token { get; set; }
-			public string token_type { get; set; }
-			public int expires_in { get; set; }
-		}
-
 		public async Task<bool> GetClientCredentialToken()
 		{
 			string url = $"{_config.auth_url}/token";
@@ -78,21 +72,28 @@ namespace nbs_smart_wallet.Services
 			var formEncoded = new FormUrlEncodedContent(form);
 			request.Content = formEncoded;
 
-			//_client.BaseAddress = new Uri(sandbox_auth_url);
 			using var response = await _client.SendAsync(request);
+			Dictionary<string, object>? tokenResponse = await HandleResponse(response);
+			if (tokenResponse == null)
+				return false; // In HandleResponse we log, so just return
 
-			response.EnsureSuccessStatusCode();
-			string content = await response.Content.ReadAsStringAsync();
-			var credential = JsonConvert.DeserializeObject<ClientCredentialTokenResponse>(content);
-			client_credential_access_token = credential.access_token;
+			tokenResponse.TryGetValue("access_token", out var accessToken);
+			// keep in mind this is a access token of type "client_credentials"
+			string? convertedToken = Convert.ToString(accessToken);
+			if (String.IsNullOrEmpty(convertedToken))
+			{
+				Log.Error("Failed to extract access token, it was null or empty");
+				return false;
+			}
 
+			client_credential_access_token = convertedToken; // prob change this to not store in a Proxy variable
 			return true;
 		}
 
 		public async Task<RevolutPayload> CreateAccountAccessConsent()
 		{
 			if (String.IsNullOrEmpty(client_credential_access_token))
-				return new RevolutPayload();
+				return new RevolutPayload(); // this is not right
 
 			string url = $"{_config.auth_url}/account-access-consents";
 
@@ -109,20 +110,18 @@ namespace nbs_smart_wallet.Services
 			request.Content = JsonContent.Create(body, new MediaTypeHeaderValue("application/json"), System.Text.Json.JsonSerializerOptions.Default);
 
 			using var response = await _client.SendAsync(request);
-			response.EnsureSuccessStatusCode();
-			string content = await response.Content.ReadAsStringAsync();
-			var account_access_consent = JsonConvert.DeserializeObject<RevolutPayload>(content);
-			// log 
-			if (account_access_consent == null)
-				throw new ArgumentNullException();
-			
-			return account_access_consent;
+			var payload = await HandleResponse(response, false, null);
+			if (payload == null)
+				return new RevolutPayload();
+
+			return payload;
 		}
 
 
 		public string GetSignedJWTFor(Guid consentId)
 		{
 			var tunnelUrl = Environment.GetEnvironmentVariable("VS_TUNNEL_URL");
+			// get correct url here
 
 			var cert = GetSigningCertificate();
 			var key = new RsaSecurityKey(cert.GetRSAPrivateKey());
@@ -139,9 +138,9 @@ namespace nbs_smart_wallet.Services
 				{
 					{ "scope", "accounts" },
 					{ "state", "somestate" },
-					{ "client_id", $"{tunnelUrl}{_config.client_id}" },
+					{ "client_id", _config.client_id },
 					{ "response_type", "code id_token" },
-					{ "redirect_uri", _config.auth_redirect_endpoint },
+					{ "redirect_uri", $"{tunnelUrl}{_config.auth_redirect_endpoint}" },
 					{ "claims", new Dictionary<string, object>
 						{
 							{ "id_token", new Dictionary<string, object>
@@ -178,18 +177,6 @@ namespace nbs_smart_wallet.Services
 		
 		public nbs_smart_wallet.Models.JsonWebKey GetJWK() => _config.jwk;
 
-		public class AccessTokenResponse // change to Dictionary
-		{
-			public string access_token { get; set; } = string.Empty;
-			public Guid access_token_id { get; set; }
-			public string token_type { get; set; } = string.Empty;
-			public int expires_in { get; set; }
-			public string refresh_token { get; set; } = string.Empty;
-			// Unix timestamp below
-			public string refresh_token_expires_at { get; set; } = string.Empty;
-
-		}
-
 		public async Task<bool> GetAccessToken(string code, string id_token, string state)
 		{
 			var coder = UrlEncoder.Create();
@@ -207,16 +194,23 @@ namespace nbs_smart_wallet.Services
 			request.Content = formEncoded;
 
 			using var response = await _client.SendAsync(request);
-			//response.EnsureSuccessStatusCode();
-			string content = await response.Content.ReadAsStringAsync();
-			// log 
-			var cookie_jar = new CookieContainer();
-			var token_response = JsonConvert.DeserializeObject<AccessTokenResponse>(content);
-			if (token_response == null)
+			Dictionary<string, object>? tokenResponse = await HandleResponse(response);
+			if (tokenResponse == null)
+				return false; // already logged if it went wrong by HandleResponse
+
+			tokenResponse.TryGetValue("access_token", out var accessTokenObj);
+			tokenResponse.TryGetValue("refresh_token", out var refreshTokenObj);
+			string? convertedAccessToken = Convert.ToString(accessTokenObj);
+			string? convertedRefreshToken = Convert.ToString(refreshTokenObj);
+			if (String.IsNullOrEmpty(convertedAccessToken) || String.IsNullOrEmpty(convertedRefreshToken))
+			{
+				Log.Error("Failed to extract access token, refresh token or both, null or empty");
 				return false;
+			}
 
 			// remember about cookie security
-			AddTokenCookies(token_response.access_token, token_response.refresh_token);
+			AddTokenCookies(convertedAccessToken, convertedRefreshToken);
+			Log.Information("Successfully gained access and refresh tokens");
 
 			return true;
 		}
@@ -309,7 +303,12 @@ namespace nbs_smart_wallet.Services
 		{	
 			var token = GetAccessTokenFromCookie();
 			if (String.IsNullOrEmpty(token))
-				throw new InvalidOperationException("access_token is empty");
+			{
+				Log.Warning("Non-authenticated user attempted GetAccounts");
+				return null;
+			}
+				
+			// if token is empty here, it's ok because we can send the request and get a refreshed one
 
 			// https://developer.revolut.com/blog/2025-03-04-open-banking-fapi1-advanced#new-subdomains-and-mandatory-mtls
 			// https://developer.revolut.com/updates/2025-03-04-open-banking-fapi1-advanced#new-subdomains-and-mandatory-mtls

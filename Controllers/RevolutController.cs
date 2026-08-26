@@ -14,10 +14,11 @@ namespace nbs_smart_wallet.Controllers;
 public class RevolutController : Controller
 {
     private RevolutProxy _revolutProxy;
-    private const string errMessageTemplate = "{Timestamp:HH:mm} [{Level}] {Message}{NewLine}{Exception}";
-    public RevolutController(RevolutProxy revolutProxy)
+    private RevolutService _service;
+    public RevolutController(RevolutService service, RevolutProxy revolutProxy)
     {
         _revolutProxy = revolutProxy;
+        _service = service;
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -40,7 +41,7 @@ public class RevolutController : Controller
 			return Ok(response);
 		} catch(Exception e)
         {
-            Log.Error(e, errMessageTemplate);
+            Log.Error(e, e.Message);
             return Problem(
                     detail: "Failed to get Json Web Key",
                     statusCode: StatusCodes.Status500InternalServerError
@@ -104,16 +105,38 @@ public class RevolutController : Controller
 		try
 		{
 			var response = await _revolutProxy.GetAccounts();
-			return View(response);
+			return Ok(response);
 		}
 		catch (Exception e)
 		{
-			Log.Error(e, errMessageTemplate);
+			Log.Error(e, e.Message);
             // middleware shows generic error 500 page on prod
 		}
 		
 		return Problem();
     }
+
+	[HttpGet]
+	[Route("/accounts/seed")]
+	public async Task<ActionResult> SeedAccounts()
+	{
+        //if (!_revolutProxy.IsLoggedIntoRevolut())
+        //	RedirectToAction("PleadForAuth");
+        
+        try
+		{
+			var response = await _service.GetAccountsSeed();
+            
+			return Ok(response);
+		}
+		catch (Exception e)
+		{
+			Log.Error(e, e.Message);
+			// middleware shows generic error 500 page on prod
+		}
+
+		return Problem();
+	}
 
 	[HttpGet]
     public async Task<ActionResult> SyncDetails()

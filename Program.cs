@@ -59,7 +59,9 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/";
 });
 
+builder.Services.AddScoped<AppService>();
 builder.Services.AddScoped<RevolutProxy>();
+builder.Services.AddScoped<RevolutService>();
 
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {

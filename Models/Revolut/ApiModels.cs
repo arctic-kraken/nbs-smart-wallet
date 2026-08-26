@@ -25,6 +25,7 @@ namespace nbs_smart_wallet.Models.Revolut
 		public DateTime TransactionToDateTime { get; set; }
 		public Guid ConsentId { get; set; }
 		public List<AppAccount> Account { get; set; } = new List<AppAccount>();
+		public List<Transaction> Transaction { get; set; } = new List<Transaction>();
 
 	}
 	public class Risk
@@ -59,5 +60,52 @@ namespace nbs_smart_wallet.Models.Revolut
 		public string Name { get; set; } = string.Empty;
 		public string SecondaryIdentification { get; set; } = string.Empty;
 
+	}
+
+	public class Transaction
+	{
+		public Guid AccountId { get; set; }
+		public AmountObj Amount { get; set; } = new AmountObj();
+		public BalanceObj Balance { get; set; } = new BalanceObj();
+		public DateTime BookingDateTime { get; set; }
+		public DateTime ValueDateTime { get; set; }
+		public string CreditDebitIndicator { get; set; } = string.Empty;
+		public CurrencyExchange CurrencyExchange { get; set; } = new CurrencyExchange();
+		public BankAccount CreditorAccount { get; set; } = new BankAccount();
+		public BankAccount DebtorAccount { get; set; } = new BankAccount();
+		public ProprietaryBankTransactionCode ProprietaryBankTransactionCode { get; set; } = new ProprietaryBankTransactionCode();
+		public string Status { get; set; } = string.Empty;
+		public Guid TransactionId { get; set; }
+		public string TransactionInformation { get; set; } = string.Empty;
+		public Dictionary<string, string> SupplementaryData = new Dictionary<string, string>();
+
+	}
+
+	public class ProprietaryBankTransactionCode
+	{
+		public string Code { get; set; } = string.Empty;
+		public string Issuer { get; set; } = string.Empty;
+	}
+
+	public class CurrencyExchange
+	{
+		public AmountObj InstructedAmount { get; set; } = new AmountObj();
+		public string SourceCurrency { get; set; } = string.Empty;
+		public string TargetCurrenct { get; set; } = string.Empty;
+		public string UnitCurrency { get; set; } = string.Empty;
+		public float ExchangeRate { get; set; }
+	}
+
+	public class AmountObj
+	{
+		public decimal Amount { get; set; }
+		public string Currency { get; set; } = string.Empty;
+	}
+	
+	public class BalanceObj
+	{
+		public AmountObj Amount { get; set; } = new AmountObj();
+		public string CreditDebitIndicator { get; set; } = string.Empty;
+		public string Type { get; set; } = string.Empty;
 	}
 }

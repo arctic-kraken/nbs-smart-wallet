@@ -15,7 +15,7 @@ public class HomeController : Controller
 {
     private SignInManager<ApplicationUser> _signInManager;
     private UserManager<ApplicationUser> _userManager;
-    public HomeController( SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
+    public HomeController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
     {
         _signInManager = signInManager;
         _userManager = userManager;
