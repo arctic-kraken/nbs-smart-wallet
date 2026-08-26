@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http.Headers;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Encodings.Web;
+using Serilog;
 
 namespace nbs_smart_wallet.Services
 {
@@ -17,8 +18,6 @@ namespace nbs_smart_wallet.Services
 		private RevolutProxyConfig _config;
 		private string client_credential_access_token = string.Empty;
 		private string client_credential_refresh_token = string.Empty;
-		private string access_token = string.Empty;
-		private string refresh_token = string.Empty;
 		
 
 		public RevolutProxy(IHttpClientFactory clientFactory, IHttpContextAccessor contextAccessor)
@@ -222,36 +221,49 @@ namespace nbs_smart_wallet.Services
 			return true;
 		}
 
-		//public async Task<bool> RefreshAccessToken()
-		//{
-		//	var coder = UrlEncoder.Create();
-		//	string url = $"{_config.auth_url}/token";
+		/// <summary>
+		/// Refreshes Access Token, using a Refresh Token
+		/// </summary>
+		/// <returns>True when access token refreshed, false when refresh failed</returns>
+		public async Task<bool> RefreshAccessToken()
+		{
+			var token = GetRefreshTokenFromCookie();
+			if (String.IsNullOrEmpty(token))
+			{
+				Log.Information("Failed to Refresh Revolut access token. Try authenticating.");
+				return false;
+			}
+			string url = $"{_config.auth_url}/token";
 
-		//	HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
-		//	request.Content?.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
-		//	var form = new Dictionary<string, string>
-		//	{
-		//		{ "grant_type", "authorization_code" },
-		//		{ "code", code },
-		//		{ "client_id", _config.client_id},
-		//	};
-		//	var formEncoded = new FormUrlEncodedContent(form);
-		//	request.Content = formEncoded;
+			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, url);
+			request.Content?.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
+			var form = new Dictionary<string, string>
+			{
+				{ "grant_type", "authorization_code" },
+				{ "refresh_token", token },
+				{ "client_id", _config.client_id},
+			};
+			var formEncoded = new FormUrlEncodedContent(form);
+			request.Content = formEncoded;
 
-		//	using var response = await _client.SendAsync(request);
-		//	//response.EnsureSuccessStatusCode();
-		//	string content = await response.Content.ReadAsStringAsync();
-		//	// log 
-		//	var cookie_jar = new CookieContainer();
-		//	var token_response = JsonConvert.DeserializeObject<AccessTokenResponse>(content);
-		//	if (token_response == null)
-		//		return false;
+			using var response = await _client.SendAsync(request);
+			Dictionary<string, object>? tokenResponse = await HandleResponse(response);
+			if (tokenResponse == null)
+				return false; // In HandleResponse we log, so just return
+			
+			tokenResponse.TryGetValue("access_token", out var accessToken);
+			string? convertedToken = Convert.ToString(accessToken);
+			if (String.IsNullOrEmpty(convertedToken))
+			{
+				Log.Error("Failed to extract access token, it was null or empty");
+				return false;
+			}
+				
+			AddTokenCookies(convertedToken, null);
 
-		//	// remember about cookie security
-		//	AddTokenCookies(token_response.access_token, token_response.refresh_token);
-
-		//	return true;
-		//}
+			Log.Information("Access Token Successfully refreshed");
+			return true;
+		}
 
 		private void AddTokenCookies(string? access_token, string? refresh_token)
 		{
@@ -293,12 +305,8 @@ namespace nbs_smart_wallet.Services
 			return String.IsNullOrEmpty(token) ? false : true;
 		}
 
-		public async Task<List<AppAccount>> GetAccounts()
-		{
-			// try access token
-			// get access token if expired
-			// if forbidden
-			
+		public async Task<List<AppAccount>?> GetAccounts()
+		{	
 			var token = GetAccessTokenFromCookie();
 			if (String.IsNullOrEmpty(token))
 				throw new InvalidOperationException("access_token is empty");
@@ -312,15 +320,69 @@ namespace nbs_smart_wallet.Services
 			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
 			using var response = await _client.SendAsync(request);
-			//response.EnsureSuccessStatusCode();
-			string content = await response.Content.ReadAsStringAsync();
-			var accounts = JsonConvert.DeserializeObject<RevolutPayload>(content);
-			// log 
-			if (accounts == null)
-				throw new ArgumentNullException();
+			var payload = await HandleResponse(response, true, request);
+			// logging done by HandleResponse
 
-			return accounts.Data.Account;
+			return payload != null ? payload.Data.Account : null;
 		}
+
+		private async Task<RevolutPayload?> HandleResponse(HttpResponseMessage msg, bool tryRefreshTokenIfForbidden, HttpRequestMessage? req)
+		{
+			if (msg == null) throw new ArgumentNullException("RevolutProxy : Response Message was null");
+
+			string content = await msg.Content.ReadAsStringAsync();
+			if (!msg.IsSuccessStatusCode)
+				Log.Error("Revolut Open Banking API returned non-success: {statusCode} : content : {content}", msg.StatusCode, content);
+
+			if (!msg.IsSuccessStatusCode && msg.StatusCode == HttpStatusCode.Forbidden && tryRefreshTokenIfForbidden)
+			{
+				if (req == null) throw new ArgumentNullException("RevolutProxy : Request to be retried was null");
+
+				Log.Information("RevolutProxy : Attempting access token refresh");
+				var accessTokenRefreshed = await RefreshAccessToken();
+				if (!accessTokenRefreshed)
+					return null; // We logged in RefreshAccessToken
+
+				Log.Information("RevolutProxy : Retrying request with new access token");
+				var token = GetAccessTokenFromCookie();
+				req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+				using var response = await _client.SendAsync(req);
+				return await HandleResponse(msg, false, null);
+			}
+			else if (!msg.IsSuccessStatusCode)
+				return null;
+
+			var payload = JsonConvert.DeserializeObject<RevolutPayload>(content);
+			if (payload == null)
+			{
+				Log.Error("RevolutProxy : Failed to Deserialize to Revolut Open Banking Payload {@content}", content);
+				return null;
+			}
+
+			return payload;
+		}
+
+		private async Task<Dictionary<string, object>?> HandleResponse(HttpResponseMessage msg)
+		{
+			if (msg == null) throw new ArgumentNullException("RevolutProxy : Response Message was null");
+
+			string content = await msg.Content.ReadAsStringAsync();
+			if (!msg.IsSuccessStatusCode)
+			{
+				Log.Error("RevolutProxy : Open Banking API returned non-success: {statusCode} : content : {content}", msg.StatusCode, content);
+				return null;
+			}
+
+			var payload = JsonConvert.DeserializeObject<Dictionary<string, object>>(content);
+			if (payload == null)
+			{
+				Log.Error("RevolutProxy : Failed to Deserialize to Revolut Open Banking Payload {@content}", content);
+				return null;
+			}
+
+			return payload;
+		} 
 		
 	}
 }

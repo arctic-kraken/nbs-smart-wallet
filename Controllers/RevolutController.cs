@@ -14,6 +14,7 @@ namespace nbs_smart_wallet.Controllers;
 public class RevolutController : Controller
 {
     private RevolutProxy _revolutProxy;
+    private const string errMessageTemplate = "{Timestamp:HH:mm} [{Level}] {Message}{NewLine}{Exception}";
     public RevolutController(RevolutProxy revolutProxy)
     {
         _revolutProxy = revolutProxy;
@@ -39,7 +40,7 @@ public class RevolutController : Controller
 			return Ok(response);
 		} catch(Exception e)
         {
-            Log.Error(e, "{Timestamp:HH:mm} [{Level}] {Message}{NewLine}{Exception}");
+            Log.Error(e, errMessageTemplate);
             return Problem(
                     detail: "Failed to get Json Web Key",
                     statusCode: StatusCodes.Status500InternalServerError
@@ -68,28 +69,53 @@ public class RevolutController : Controller
         // get access token now
         _ = await _revolutProxy.GetAccessToken(code, id_token, state);
 
-		return RedirectToAction("Index", "Home");
+		return RedirectToAction("AuthSuccess");
     }
 
-    //public IActionResult AuthSuccess()
-    //{
-    //    return View();
-    //}
+    public IActionResult AuthSuccess()
+    {
+        return View();
+    }
+
+    public IActionResult PleadForAuth()
+    {
+        return View();
+    }
 
 	[HttpGet]
 	[Route("/accounts")]
 	public async Task<ActionResult> Accounts()
 	{
-  //      if (!_revolutProxy.IsLoggedIntoRevolut())
-  //      {
+        if (!_revolutProxy.IsLoggedIntoRevolut())
+            RedirectToAction("PleadForAuth");
 
-  //      }
-		//var response = await _revolutProxy.GetAccounts();
-		return Ok("Soon to be added");
-		//return View(response);
+        // add Account viewing page
+        
+        return View();
 	}
 
-    [HttpGet]
+	[HttpGet]
+	[Route("/accounts/get")]
+	public async Task<ActionResult> GetAccounts()
+	{
+		if (!_revolutProxy.IsLoggedIntoRevolut())
+			RedirectToAction("PleadForAuth");
+
+		try
+		{
+			var response = await _revolutProxy.GetAccounts();
+			return View(response);
+		}
+		catch (Exception e)
+		{
+			Log.Error(e, errMessageTemplate);
+            // middleware shows generic error 500 page on prod
+		}
+		
+		return Problem();
+    }
+
+	[HttpGet]
     public async Task<ActionResult> SyncDetails()
     {
         return Ok("Soon to be added");
