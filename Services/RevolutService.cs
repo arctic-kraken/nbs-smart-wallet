@@ -1,4 +1,5 @@
 ﻿using nbs_smart_wallet.Models;
+using nbs_smart_wallet.Models.DbSets;
 using nbs_smart_wallet.Models.Revolut;
 using Newtonsoft.Json;
 
@@ -16,7 +17,7 @@ namespace nbs_smart_wallet.Services
 			_app = appService;
 		}
 
-		public async Task<List<AppAccount>?> GetAccountsSeed()
+		public async Task<List<AppAccount>> GetAccountsSeed()
 		{
 			string json = """
 				[
@@ -45,8 +46,73 @@ namespace nbs_smart_wallet.Services
 				""";
 			var accounts = JsonConvert.DeserializeObject<List<AppAccount>>(json);
 
-
 			return accounts;
+		}
+
+		public Transaction GetTestTransaction()
+		{
+			string json = """
+								{
+					"AccountId": "c362263a-xxxx-xxxx-xxxx-70ee3d4fede9",
+					"Amount": {
+					  "Amount": "20.54",
+					  "Currency": "GBP"
+					},
+					"Balance": {
+					  "Amount": {
+						"Amount": "2088.55",
+						"Currency": "GBP"
+					  },
+					  "CreditDebitIndicator": "Credit",
+					  "Type": "InterimBooked"
+					},
+					"BookingDateTime": "2024-12-27T06:05:20.625880Z",
+					"ValueDateTime": "2024-12-27T06:05:21.162872Z",
+					"CreditDebitIndicator": "Debit",
+					"CurrencyExchange": {
+					  "InstructedAmount": {
+						"Amount": "20.54",
+						"Currency": "GBP"
+					  },
+					  "SourceCurrency": "GBP",
+					  "TargetCurrency": "EUR",
+					  "UnitCurrency": "GBP",
+					  "ExchangeRate": "1.07123405660663439638574742941974304"
+					},
+					"CreditorAccount": {
+					  "SchemeName": "UK.OBIE.IBAN",
+					  "Identification": "LT111111111111111111",
+					  "Name": "Receiver Co."
+					},
+					"DebtorAccount": {
+					  "SchemeName": "UK.OBIE.IBAN",
+					  "Identification": "GB95REVO00997053872360",
+					  "Name": "John Doe"
+					},
+					"ProprietaryBankTransactionCode": {
+					  "Code": "TRANSFER",
+					  "Issuer": "Revolut"
+					},
+					"Status": "Booked",
+					"TransactionId": "676e43a0-a0e9-ad9a-xxxx-a0e99aea6678",
+					"TransactionInformation": "To Receiver Co.",
+					"SupplementaryData": {
+					  "UserComments": "test"
+					}
+				}
+				""";
+			var trx = JsonConvert.DeserializeObject<Transaction>(json);
+
+			return trx;
+		}
+
+		public async Task<bool> SyncRevAccounts()
+		{
+			var acc = GetAccountsSeed();
+
+			//_db.
+
+			return true;
 		}
 	}
 }
