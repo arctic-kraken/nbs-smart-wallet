@@ -1,5 +1,9 @@
 ﻿namespace nbs_smart_wallet.Models
 {
+	/// <summary>
+	///  All these arent enums because EntityFrameworkCore is having a bad time with converting them
+	///  And I have more important things to worry about
+	/// </summary>
 	public static class AppConsts
 	{
 		public static class Currency
