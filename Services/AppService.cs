@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using nbs_smart_wallet.Models.Authentication;
+using Serilog;
 
 namespace nbs_smart_wallet.Services
 {
@@ -13,20 +14,22 @@ namespace nbs_smart_wallet.Services
 			_userManager = userManager;
 		}
 
-		public string WhoIsCurrentUser()
+		public Guid WhoIsCurrentUser()
 		{
-			var id = _userManager.GetUserId(_accessor.HttpContext.User);
+			if (_accessor.HttpContext == null)
+				throw new ArgumentNullException($"{nameof(AppService)}: Called {nameof(WhoIsCurrentUser)} with null context");
 
+			var guidStr = _userManager.GetUserId(_accessor.HttpContext.User);
+			if (String.IsNullOrEmpty(guidStr))
+			{
+				// Should never happen
+				string msg = "AppService : current user not found within context";
+				Log.Error(msg);
+				throw new Exception(msg);
+			}
 
-			return id;
+			return Guid.Parse(guidStr);
 		}
-
-		//public static string WhoIsCurrentUser(UserManager<ApplicationUser> manager, HttpContext context)
-		//{
-		//	string id = manager.GetUserId(context.User);
-
-		//	return id;
-		//}
 
 	}
 }

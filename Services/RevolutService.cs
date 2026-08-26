@@ -17,7 +17,7 @@ namespace nbs_smart_wallet.Services
 			_app = appService;
 		}
 
-		public async Task<List<AppAccount>> GetAccountsSeed()
+		public List<AppAccount> GetAccountsSeed()
 		{
 			string json = """
 				[
@@ -108,9 +108,29 @@ namespace nbs_smart_wallet.Services
 
 		public async Task<bool> SyncRevAccounts()
 		{
-			var acc = GetAccountsSeed();
+			var currentUserId = _app.WhoIsCurrentUser();
+			var accs = GetAccountsSeed();
 
-			//_db.
+			var trx = GetTestTransaction();
+
+			foreach (var a in accs)
+			{
+				_db.RevAccounts.Add(new RevAccount
+				{
+					AspNetUserId = currentUserId,
+					RevAccountId = a.AccountId,
+					Currency = a.Currency,
+					AccountType = a.AccountType,
+					AccountSubType = a.AccountSubType,
+					Nickname = a.Nickname,
+				});
+			}
+			_db.SaveChanges();
+			var acc = _db.RevAccounts
+				.FirstOrDefault(x => x.AspNetUserId == currentUserId && x.Currency == AppConsts.Currency.BritishPound);
+
+			//Enum.GetName(AccountType.Personal);
+			//AppConsts.SchemeNames.UK_IBAN
 
 			return true;
 		}

@@ -1,4 +1,4 @@
-﻿namespace nbs_smart_wallet.Models
+﻿namespace nbs_smart_wallet.Models.Revolut
 {
 	public class RevolutProxyConfig
 	{

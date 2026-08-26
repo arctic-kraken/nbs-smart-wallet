@@ -118,14 +118,14 @@ public class RevolutController : Controller
 
 	[HttpGet]
 	[Route("/accounts/seed")]
-	public async Task<ActionResult> SeedAccounts()
+	public ActionResult SeedAccounts()
 	{
         //if (!_revolutProxy.IsLoggedIntoRevolut())
         //	RedirectToAction("PleadForAuth");
         
         try
 		{
-			var response = await _service.GetAccountsSeed();
+			var response = _service.GetAccountsSeed();
             
 			return Ok(response);
 		}
@@ -139,8 +139,9 @@ public class RevolutController : Controller
 	}
 
 	[HttpGet]
-    public async Task<ActionResult> SyncDetails()
+    public ActionResult SyncDetails()
     {
+
         return Ok("Soon to be added");
     }
 }

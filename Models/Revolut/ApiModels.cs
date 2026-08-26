@@ -1,6 +1,4 @@
-﻿using static nbs_smart_wallet.Services.RevolutProxy;
-
-namespace nbs_smart_wallet.Models.Revolut
+﻿namespace nbs_smart_wallet.Models.Revolut
 {
 	public class RevolutPayload
 	{

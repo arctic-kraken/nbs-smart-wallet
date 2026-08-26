@@ -1,6 +1,5 @@
 ﻿using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
-using nbs_smart_wallet.Models;
 using nbs_smart_wallet.Models.Revolut;
 using Newtonsoft.Json;
 using System.Net;
@@ -175,7 +174,7 @@ namespace nbs_smart_wallet.Services
 			return $"{_config.url}/ui/index.html?response_type=code%20id_token&scope=accounts&redirect_uri={$"{hostname}{_config.auth_redirect_endpoint}"}&client_id={_config.client_id}&request={GetSignedJWTFor(consentId)}";
 		}
 		
-		public nbs_smart_wallet.Models.JsonWebKey GetJWK() => _config.jwk;
+		public Models.Revolut.JsonWebKey GetJWK() => _config.jwk;
 
 		public async Task<bool> GetAccessToken(string code, string id_token, string state)
 		{
