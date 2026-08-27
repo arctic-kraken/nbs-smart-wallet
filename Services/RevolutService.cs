@@ -53,7 +53,7 @@ namespace nbs_smart_wallet.Services
 		{
 			string json = """
 								{
-					"AccountId": "c362263a-xxxx-xxxx-xxxx-70ee3d4fede9",
+					"AccountId": "6c27fab0-1624-424a-97a2-b3ff77eeb272",
 					"Amount": {
 					  "Amount": "20.54",
 					  "Currency": "GBP"
@@ -94,7 +94,7 @@ namespace nbs_smart_wallet.Services
 					  "Issuer": "Revolut"
 					},
 					"Status": "Booked",
-					"TransactionId": "676e43a0-a0e9-ad9a-xxxx-a0e99aea6678",
+					"TransactionId": "fdd62279-ed58-4eb8-9bf1-ea9b7821bf4a",
 					"TransactionInformation": "To Receiver Co.",
 					"SupplementaryData": {
 					  "UserComments": "test"
@@ -106,7 +106,7 @@ namespace nbs_smart_wallet.Services
 			return trx;
 		}
 
-		public async Task<bool> SyncRevAccounts()
+		public void SyncRevAccounts()
 		{
 			var currentUserId = _app.WhoIsCurrentUser();
 			var accs = GetAccountsSeed();
@@ -127,12 +127,29 @@ namespace nbs_smart_wallet.Services
 			}
 			_db.SaveChanges();
 			var acc = _db.RevAccounts
-				.FirstOrDefault(x => x.AspNetUserId == currentUserId && x.Currency == AppConsts.Currency.BritishPound);
+				.First(x => x.AspNetUserId == currentUserId && x.Currency == AppConsts.Currency.BritishPound);
 
-			//Enum.GetName(AccountType.Personal);
-			//AppConsts.SchemeNames.UK_IBAN
+			_db.RevTransactions.Add(new RevTransaction
+			{
+				RevAccountId = acc.RevAccountId,
+				Amount = trx.Amount.Amount,
+				Currency = trx.Amount.Currency,
+				BalanceAmount = trx.Balance.Amount.Amount,
+				BalanceCurrency = trx.Balance.Amount.Currency,
+				BookingDateTime = trx.BookingDateTime,
+				ValueDateTime = trx.ValueDateTime,
+				CurrencyExchangeJson = JsonConvert.SerializeObject(trx.CurrencyExchange),
+				CreditDebitIndicator = trx.CreditDebitIndicator,
+				RevCreditorAccountJson = JsonConvert.SerializeObject(trx.CreditorAccount),
+				RevDebtorAccountJson = JsonConvert.SerializeObject(trx.DebtorAccount),
+				RevTransactionId = trx.TransactionId,
+				Status = trx.Status,
+				SupplementaryData = JsonConvert.SerializeObject(trx.SupplementaryData),
+				TransactionInformation = trx.TransactionInformation
+			});
+			_db.SaveChanges();
 
-			return true;
+			//return true;
 		}
 	}
 }

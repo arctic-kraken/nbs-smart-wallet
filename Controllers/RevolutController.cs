@@ -141,7 +141,7 @@ public class RevolutController : Controller
 	[HttpGet]
     public ActionResult SyncDetails()
     {
-
-        return Ok("Soon to be added");
+        _service.SyncRevAccounts();
+        return Ok();
     }
 }
