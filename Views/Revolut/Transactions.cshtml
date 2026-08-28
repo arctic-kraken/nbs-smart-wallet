@@ -1,0 +1,39 @@
+﻿@{
+}
+@model List<nbs_smart_wallet.Models.DbSets.RevTransaction>
+
+<div class="grid max-h-full gap-1 overflow-y-scroll">
+    @if (Model != null && Model.Count > 0)
+    {
+        @foreach (var trx in Model)
+        {
+            <div class="inline-flex gap-2 rounded bg-gray-800">
+                <div class="m-2">
+                    <img src="~/img/icons/@{ trx.Currency.ToLower(); }.svg">
+
+                    @trx.Amount
+                    @* @trx.Currency *@
+                    @* @trx.CreditDebitIndicator *@
+                </div>
+                <div class="m-2">
+                    @trx.TransactionInformation
+                </div>
+                @* <div class="m-2">
+                    @trx.CreditDebitIndicator
+                </div> *@
+                <div class="m-2">
+                    @trx.BookingDateTime.Date
+                </div>
+                <div class="m-2">
+                    @trx.Status
+                </div>
+            </div>
+        }
+    } else
+    {
+        <div>
+            No transactions found for given account
+        </div>
+    }
+
+</div>

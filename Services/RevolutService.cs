@@ -2,6 +2,7 @@
 using nbs_smart_wallet.Models.DbSets;
 using nbs_smart_wallet.Models.Revolut;
 using Newtonsoft.Json;
+using Serilog;
 
 namespace nbs_smart_wallet.Services
 {
@@ -150,6 +151,34 @@ namespace nbs_smart_wallet.Services
 			_db.SaveChanges();
 
 			//return true;
+		}
+
+		public List<RevAccount> GetAccounts()
+		{
+			var userId = _app.WhoIsCurrentUser();
+
+			var accounts = _db.RevAccounts.Where(x => x.AspNetUserId == userId).ToList();
+
+			return accounts;
+		}
+
+		public List<RevTransaction> GetTransactionsFor(Guid accountId)
+		{
+			var userId = _app.WhoIsCurrentUser();
+
+			var account = _db.RevAccounts.SingleOrDefault(x => x.RevAccountId == accountId && x.AspNetUserId == userId);
+			if (account == null)
+			{
+				Log.Warning("Failed to find rev account {id} for user {uId} when getting transactions", accountId, userId);
+				return new List<RevTransaction>();
+			}
+
+			var trxs = _db.RevTransactions.Where(x => x.RevAccountId == account.RevAccountId)
+				.OrderByDescending(x => x.BookingDateTime)
+				.Take(15)
+				.ToList();
+
+			return trxs;
 		}
 	}
 }

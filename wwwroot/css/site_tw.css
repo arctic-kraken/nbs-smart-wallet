@@ -580,6 +580,9 @@
   .h-full {
     height: 100%;
   }
+  .max-h-full {
+    max-height: 100%;
+  }
   .min-h-\[50em\] {
     min-height: 50em;
   }
@@ -618,6 +621,9 @@
   }
   .max-w-fit {
     max-width: fit-content;
+  }
+  .min-w-\[200px\] {
+    min-width: 200px;
   }
   .flex-shrink {
     flex-shrink: 1;

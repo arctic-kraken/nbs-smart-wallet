@@ -90,9 +90,9 @@ public class RevolutController : Controller
         if (!_revolutProxy.IsLoggedIntoRevolut())
             RedirectToAction("PleadForAuth");
 
-        // add Account viewing page
+        var accounts = _service.GetAccounts();
         
-        return View();
+        return View(accounts);
 	}
 
 	[HttpGet]
@@ -143,5 +143,13 @@ public class RevolutController : Controller
     {
         _service.SyncRevAccounts();
         return Ok();
+    }
+
+    [HttpGet]
+    public ActionResult Transactions(Guid id)
+    {
+        var trxs = _service.GetTransactionsFor(id);
+
+        return View(trxs);
     }
 }

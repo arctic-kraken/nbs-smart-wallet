@@ -1,0 +1,33 @@
+﻿@{
+
+}
+@model List<nbs_smart_wallet.Models.DbSets.RevAccount>
+
+<div class="grid gap-1 overflow-y-scroll">
+    @foreach(var acc in Model)
+    {
+        <div class="min-w-[200px] rounded bg-gray-800 p-2">
+            <div>
+                @if (String.IsNullOrEmpty(acc.Nickname))
+                {
+                    <span>John Doe</span>
+                } else
+                {
+                    <span>@acc.Nickname</span>
+                }
+            </div>
+            <div>
+                @acc.AccountType
+            </div>
+            <div>
+                @acc.AccountSubType
+            </div>
+            <div>
+                @acc.Currency
+            </div>
+            <div>
+                <a asp-action="Transactions" asp-controller="Revolut" asp-route-id="@acc.RevAccountId">Transactions</a>
+            </div>
+        </div>
+    }
+</div>
