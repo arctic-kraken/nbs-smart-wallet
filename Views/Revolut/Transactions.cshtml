@@ -2,38 +2,39 @@
 }
 @model List<nbs_smart_wallet.Models.DbSets.RevTransaction>
 
-<div class="grid max-h-full gap-1 overflow-y-scroll">
-    @if (Model != null && Model.Count > 0)
-    {
-        @foreach (var trx in Model)
-        {
-            <div class="inline-flex gap-2 rounded bg-gray-800">
-                <div class="m-2">
-                    <img src="~/img/icons/@{ trx.Currency.ToLower(); }.svg">
+<main role="main" class="h-full w-2/3" style="margin: 0em auto">
 
-                    @trx.Amount
-                    @* @trx.Currency *@
-                    @* @trx.CreditDebitIndicator *@
+    <div class="m-2 grid max-h-full gap-1 overflow-y-scroll">
+        @if (Model != null && Model.Count > 0)
+        {
+            @foreach (var trx in Model)
+            {
+                <div class="inline-flex justify-evenly gap-2 rounded bg-gray-800">
+                    <div class="m-2 inline-flex justify-evenly gap-2">
+                        <div class="inline-flex flex-wrap content-center">
+                            <img class="size-6 invert-[100%]" src="~/img/icons/@(trx.Currency.ToLower()).svg">
+                        </div>
+                        <div class="">
+                            @trx.Amount
+                        </div>
+                    </div>
+                    <div class="m-2">
+                        @trx.TransactionInformation
+                    </div>
+                    <div class="m-2">
+                        @trx.BookingDateTime.ToShortDateString()
+                    </div>
+                    <div class="m-2">
+                        @trx.Status
+                    </div>
                 </div>
-                <div class="m-2">
-                    @trx.TransactionInformation
-                </div>
-                @* <div class="m-2">
-                    @trx.CreditDebitIndicator
-                </div> *@
-                <div class="m-2">
-                    @trx.BookingDateTime.Date
-                </div>
-                <div class="m-2">
-                    @trx.Status
-                </div>
+            }
+        } else
+        {
+            <div>
+                No transactions found for given account
             </div>
         }
-    } else
-    {
-        <div>
-            No transactions found for given account
-        </div>
-    }
 
-</div>
+    </div>
+</main>
