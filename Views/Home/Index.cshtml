@@ -16,14 +16,17 @@
     </a>
 </div>
 
-@* <div>
-    <canvas id="myChart"></canvas>
+<div>
+    <canvas id="myChart" class=""></canvas>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="~/lib/Chart.js/chart.umd.min.js"></script>
 
 <script>
+
     const ctx = document.getElementById('myChart');
+    Chart.defaults.font.family = "'Questrial', sans-serif";
+    Chart.defaults.color = "#FFFFFF";
 
     new Chart(ctx, {
         type: 'bar',
@@ -41,6 +44,8 @@
                     beginAtZero: true
                 }
             }
+            
         }
     });
-</script> *@
+
+</script>

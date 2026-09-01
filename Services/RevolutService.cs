@@ -225,7 +225,7 @@ namespace nbs_smart_wallet.Services
 
 					foreach (var bacc in acc.Account)
 					{
-						var baccInDb = _db.RevBankAccounts.FirstOrDefault(x => x.RevAccountId == acc.AccountId);
+						var baccInDb = _db.RevBankAccounts.FirstOrDefault(x => x.RevAccountId == acc.AccountId && x.SchemeName == bacc.SchemeName);
 						if (baccInDb != null)
 						{
 							baccInDb.Identification = bacc.Identification;
