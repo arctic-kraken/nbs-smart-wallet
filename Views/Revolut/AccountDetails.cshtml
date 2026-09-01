@@ -32,16 +32,14 @@
         {
             @foreach (var trx in Model.Transactions)
             {
-                <div class="inline-flex justify-evenly gap-2 rounded bg-gray-800">
-                    <div class="m-2 inline-flex justify-evenly gap-2">
-                        <div class="inline-flex flex-wrap content-center">
-                            <img class="size-6 invert-[100%]" src="~/img/icons/@(trx.Currency.ToLower()).svg">
-                        </div>
-                        <div class="">
-                            @trx.Amount
-                        </div>
+                <div class="inline-flex justify-around gap-2 rounded bg-gray-800">
+                    <div class="inline-flex flex-wrap content-center">
+                        <img class="size-6 invert-[100%]" src="~/img/icons/@(trx.Currency.ToLower()).svg">
                     </div>
-                    <div class="m-2">
+                    <div class="m-2 flex w-full max-w-1/4 justify-center overflow-clip text-ellipsis">
+                        @trx.Amount
+                    </div>
+                    <div class="m-2 w-full max-w-1/4 overflow-clip text-ellipsis">
                         @trx.TransactionInformation
                     </div>
                     <div class="m-2">

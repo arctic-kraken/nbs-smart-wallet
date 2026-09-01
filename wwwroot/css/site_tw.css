@@ -616,6 +616,9 @@
   .w-full {
     width: 100%;
   }
+  .max-w-1\/4 {
+    max-width: calc(1 / 4 * 100%);
+  }
   .max-w-1\/6 {
     max-width: calc(1 / 6 * 100%);
   }
@@ -703,6 +706,9 @@
   .items-center {
     align-items: center;
   }
+  .justify-around {
+    justify-content: space-around;
+  }
   .justify-center {
     justify-content: center;
   }
@@ -739,6 +745,9 @@
   }
   .overflow-auto {
     overflow: auto;
+  }
+  .overflow-clip {
+    overflow: clip;
   }
   .overflow-hidden {
     overflow: hidden;
@@ -1038,6 +1047,9 @@
   }
   .text-wrap {
     text-wrap: wrap;
+  }
+  .text-ellipsis {
+    text-overflow: ellipsis;
   }
   .text-black {
     color: var(--color-black);
