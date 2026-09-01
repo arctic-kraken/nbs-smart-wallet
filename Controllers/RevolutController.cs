@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using nbs_smart_wallet.Models;
 using nbs_smart_wallet.Models.Authentication;
+using nbs_smart_wallet.Models.DbSets;
 using nbs_smart_wallet.Services;
 using Newtonsoft.Json;
 using Serilog;
@@ -90,31 +91,40 @@ public class RevolutController : Controller
         if (!_revolutProxy.IsLoggedIntoRevolut())
             RedirectToAction("PleadForAuth");
 
-        var accounts = _service.GetAccounts();
-        
-        return View(accounts);
+        try
+        {
+			_ = await _service.SyncAccounts();
+			var accounts = _service.GetAccounts();
+			return View(accounts);
+		}
+        catch (Exception e)
+        {
+            Log.Error(e, e.Message);
+			// middleware shows generic error 500 page on prod
+			return View();
+		}
 	}
 
-	[HttpGet]
-	[Route("/accounts/get")]
-	public async Task<ActionResult> GetAccounts()
-	{
-		if (!_revolutProxy.IsLoggedIntoRevolut())
-			RedirectToAction("PleadForAuth");
+	//[HttpGet]
+	//[Route("/accounts/get")]
+	//public async Task<ActionResult> GetAccounts()
+	//{
+	//	if (!_revolutProxy.IsLoggedIntoRevolut())
+	//		RedirectToAction("PleadForAuth");
 
-		try
-		{
-			var response = await _revolutProxy.GetAccounts();
-			return Ok(response);
-		}
-		catch (Exception e)
-		{
-			Log.Error(e, e.Message);
-            // middleware shows generic error 500 page on prod
-		}
+	//	try
+	//	{
+	//		var success = await _service.SyncAccounts();
+ //           return Ok(success);
+	//	}
+	//	catch (Exception e)
+	//	{
+	//		Log.Error(e, e.Message);
+ //           // middleware shows generic error 500 page on prod
+	//	}
 		
-		return Problem();
-    }
+	//	return Problem();
+ //   }
 
 	[HttpGet]
 	[Route("/accounts/seed")]
@@ -125,9 +135,10 @@ public class RevolutController : Controller
         
         try
 		{
-			var response = _service.GetAccountsSeed();
+			//var response = _service.GetAccountsSeed();
+            _service.SeedRandomTransactions();
             
-			return Ok(response);
+			return Ok();
 		}
 		catch (Exception e)
 		{
@@ -145,11 +156,31 @@ public class RevolutController : Controller
         return Ok();
     }
 
-    [HttpGet]
-    public ActionResult Transactions(Guid id)
-    {
-        var trxs = _service.GetTransactionsFor(id);
+	public class AccountDetailsEditModel
+	{
+		public List<RevTransaction> Transactions { get; set; } = new List<RevTransaction>();
+		public List<RevBankAccount> BankAccounts { get; set; } = new List<RevBankAccount>();
+	}
 
-        return View(trxs);
+	[HttpGet]
+    public async Task<ActionResult> AccountDetails(Guid id)
+    {
+		if (!_revolutProxy.IsLoggedIntoRevolut())
+			RedirectToAction("PleadForAuth");
+
+		try
+		{
+			_ = await _service.SyncTransactionsOf(id);
+            var model = new AccountDetailsEditModel();
+			model.Transactions = _service.GetTransactionsFor(id);
+            model.BankAccounts = _service.GetBankAccountsFor(id);
+			return View(model);
+		}
+		catch (Exception e)
+		{
+			Log.Error(e, e.Message);
+			// middleware shows generic error 500 page on prod
+			return View();
+		}
     }
 }

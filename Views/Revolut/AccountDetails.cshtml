@@ -1,0 +1,63 @@
+﻿@{
+    ViewData["Title"] = "Account Details";
+}
+@model nbs_smart_wallet.Controllers.RevolutController.AccountDetailsEditModel
+
+<main role="main" class="inline-flex h-full w-full" >
+    <div class="m-2 flex max-h-full w-1/3 flex-col gap-1">
+        @if (Model != null && Model.BankAccounts.Count > 0)
+        {
+            @foreach (var bacc in Model.BankAccounts)
+            {
+                <div class="flex max-w-full flex-col justify-evenly gap-2 rounded bg-gray-800">
+                    
+                    <div class="m-2">
+                        @bacc.Name
+                    </div>
+                    <div class="m-2">
+                        @bacc.SchemeName
+                    </div>
+                    <div class="m-2">
+                        @bacc.Identification
+                    </div>
+                    <div class="m-2">
+                        @bacc.SecondaryIdentification
+                    </div>
+                </div>
+            }
+        }
+    </div>
+    <div class="m-2 grid max-h-full w-full scrollbar-none gap-1 overflow-y-scroll">
+        @if (Model != null && Model.Transactions.Count > 0)
+        {
+            @foreach (var trx in Model.Transactions)
+            {
+                <div class="inline-flex justify-evenly gap-2 rounded bg-gray-800">
+                    <div class="m-2 inline-flex justify-evenly gap-2">
+                        <div class="inline-flex flex-wrap content-center">
+                            <img class="size-6 invert-[100%]" src="~/img/icons/@(trx.Currency.ToLower()).svg">
+                        </div>
+                        <div class="">
+                            @trx.Amount
+                        </div>
+                    </div>
+                    <div class="m-2">
+                        @trx.TransactionInformation
+                    </div>
+                    <div class="m-2">
+                        @trx.BookingDateTime.ToString("MMMM d yyyy")
+                    </div>
+                    <div class="m-2">
+                        @trx.Status
+                    </div>
+                </div>
+            }
+        } else
+        {
+            <div>
+                No transactions found for given account
+            </div>
+        }
+
+    </div>
+</main>

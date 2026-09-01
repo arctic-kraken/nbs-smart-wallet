@@ -17,6 +17,10 @@
 				{
 					"ReadAccountsBasic",
 					"ReadAccountsDetail",
+					"ReadTransactionsBasic",
+					"ReadTransactionsDetail",
+					"ReadTransactionsCredits",
+					"ReadTransactionsDebits"
 				};
 		public DateTime ExpirationDateTime { get; set; }
 		public DateTime TransactionFromDateTime { get; set; }

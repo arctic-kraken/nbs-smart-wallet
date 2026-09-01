@@ -17,6 +17,7 @@ namespace nbs_smart_wallet.Services
 		private RevolutProxyConfig _config;
 		private string client_credential_access_token = string.Empty;
 		private AppService _app;
+		private const string dateFormat = "yyyy-MM-ddTHH:mm:ssZ";
 
 		public RevolutProxy(IHttpClientFactory clientFactory, IHttpContextAccessor contextAccessor, AppService appService)
 		{
@@ -220,8 +221,8 @@ namespace nbs_smart_wallet.Services
 		/// <returns>True when access token refreshed, false when refresh failed</returns>
 		public async Task<bool> RefreshAccessToken()
 		{
-			var token = GetRefreshTokenFromCookie();
-			if (String.IsNullOrEmpty(token))
+			var refreshToken = GetRefreshTokenFromCookie();
+			if (String.IsNullOrEmpty(refreshToken))
 			{
 				Log.Information("Failed to Refresh Revolut access token. Try authenticating.");
 				return false;
@@ -232,8 +233,8 @@ namespace nbs_smart_wallet.Services
 			request.Content?.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 			var form = new Dictionary<string, string>
 			{
-				{ "grant_type", "authorization_code" },
-				{ "refresh_token", token },
+				{ "grant_type", "refresh_token" },
+				{ "refresh_token", refreshToken },
 				{ "client_id", _config.client_id},
 			};
 			var formEncoded = new FormUrlEncodedContent(form);
@@ -298,12 +299,12 @@ namespace nbs_smart_wallet.Services
 			return String.IsNullOrEmpty(token) ? false : true;
 		}
 
-		public async Task<List<AppAccount>?> GetAccounts()
+		public async Task<List<AppAccount>?> FetchAccounts()
 		{	
 			var token = GetAccessTokenFromCookie();
 			if (String.IsNullOrEmpty(token))
 			{
-				Log.Warning("Non-authenticated user attempted GetAccounts");
+				Log.Warning("Non-authenticated user attempted FetchAccounts");
 				return null;
 			}
 				
@@ -324,6 +325,33 @@ namespace nbs_smart_wallet.Services
 			return payload != null ? payload.Data.Account : null;
 		}
 
+		public async Task<List<Transaction>?> FetchTransactionsFor(Guid revAccountId, DateTime? fromDateTime, DateTime? toDateTime)
+		{
+			var token = GetAccessTokenFromCookie();
+			if (String.IsNullOrEmpty(token))
+			{
+				Log.Warning("Non-authenticated user attempted FetchTransactionsFor");
+				return null;
+			}
+			string url = $"{_config.auth_url}/accounts/{revAccountId}/transactions";
+			if (fromDateTime != null && toDateTime != null)
+			{
+				url += $"?fromBookingDateTime={fromDateTime?.ToString(dateFormat)}" +
+					 $"&toBookingDateTime={toDateTime?.ToString(dateFormat)}";
+			}
+
+			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
+			request.Headers.Add("x-fapi-financial-id", _config.revolut_financial_id);
+			request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+			using var response = await _client.SendAsync(request);
+			var payload = await HandleResponse(response, true, request);
+			// logging done by HandleResponse
+
+			return payload != null ? payload.Data.Transaction : null;
+		}
+
+
 		private async Task<RevolutPayload?> HandleResponse(HttpResponseMessage msg, bool tryRefreshTokenIfForbidden, HttpRequestMessage? req)
 		{
 			if (msg == null) throw new ArgumentNullException("RevolutProxy : Response Message was null");
@@ -332,7 +360,7 @@ namespace nbs_smart_wallet.Services
 			if (!msg.IsSuccessStatusCode)
 				Log.Error("Revolut Open Banking API returned non-success: {statusCode} : content : {content}", msg.StatusCode, content);
 
-			if (!msg.IsSuccessStatusCode && msg.StatusCode == HttpStatusCode.Forbidden && tryRefreshTokenIfForbidden)
+			if (!msg.IsSuccessStatusCode && msg.StatusCode == HttpStatusCode.Unauthorized && tryRefreshTokenIfForbidden)
 			{
 				if (req == null) throw new ArgumentNullException("RevolutProxy : Request to be retried was null");
 
@@ -343,9 +371,17 @@ namespace nbs_smart_wallet.Services
 
 				Log.Information("RevolutProxy : Retrying request with new access token");
 				var token = GetAccessTokenFromCookie();
-				req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+				var newMessage = new HttpRequestMessage();
+				newMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+				req.Headers.Remove("Authorization");
+				foreach (var h in req.Headers)
+					newMessage.Headers.Add(h.Key, h.Value);
 
-				using var response = await _client.SendAsync(req);
+				newMessage.Content = req.Content;
+				newMessage.RequestUri = req.RequestUri;
+
+
+				using var response = await _client.SendAsync(newMessage);
 				return await HandleResponse(msg, false, null);
 			}
 			else if (!msg.IsSuccessStatusCode)
