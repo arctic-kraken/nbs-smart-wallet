@@ -3,11 +3,12 @@
 }
 @model List<nbs_smart_wallet.Models.DbSets.RevAccount>
 
-<main role="main" class="h-full" style="margin: 0em auto">
-    <div class="grid gap-1 overflow-y-scroll" >
+<main role="main" class="h-full min-h-[50em] w-2/3 content-center" style="margin: 0em auto">
+
+    <div class="m-2 grid scrollbar-none gap-2 overflow-y-scroll" >
         @foreach(var acc in Model)
         {
-            <div class="min-w-[200px] rounded bg-gray-800 p-2">
+            <div class="inline-flex justify-evenly gap-2 rounded bg-gray-800 p-2">
                 <div>
                     @if (String.IsNullOrEmpty(acc.Nickname))
                     {
@@ -17,19 +18,24 @@
                         <span>@acc.Nickname</span>
                     }
                 </div>
+                <div class="inline-flex flex-wrap content-center">
+                    <img class="size-6 invert-[100%]" src="~/img/icons/@(acc.Currency.ToLower()).svg">
+                </div>
                 <div>
                     @acc.AccountType
                 </div>
                 <div>
                     @acc.AccountSubType
                 </div>
-                <div>
-                    @acc.Currency
-                </div>
-                <div>
-                    <a asp-action="Transactions" asp-controller="Revolut" asp-route-id="@acc.RevAccountId">Transactions</a>
+                <div class="inline-flex flex-wrap content-center">
+                    <a asp-action="Transactions" asp-controller="Revolut" asp-route-id="@acc.RevAccountId">
+                        <div>
+                            <img class="size-6 invert-[100%]" src="~/img/icons/arrow-right-circle.svg">
+                        </div>
+                    </a>
                 </div>
             </div>
         }
     </div>
+
 </main>

@@ -625,9 +625,6 @@
   .max-w-fit {
     max-width: fit-content;
   }
-  .min-w-\[200px\] {
-    min-width: 200px;
-  }
   .flex-shrink {
     flex-shrink: 1;
   }
@@ -663,6 +660,9 @@
   }
   .resize {
     resize: both;
+  }
+  .scrollbar-none {
+    scrollbar-width: none;
   }
   .grid-rows-2 {
     grid-template-rows: repeat(2, minmax(0, 1fr));
