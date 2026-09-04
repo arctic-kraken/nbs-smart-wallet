@@ -35,7 +35,7 @@
                         <input class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" asp-for="@Model.Password" type="password" placeholder="Password" />
                     </div>
                     <div class="content-center">
-                        <input class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" asp-for="@Model.Password" type="password" placeholder="Password" />
+                        <input class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" asp-for="@Model.ConfirmPassword" type="password" placeholder="Password" />
                     </div>
                     <div class="flex justify-center">
                         <button class="max-w-fit rounded bg-white p-2 text-black hover:cursor-pointer" type="submit">
@@ -47,6 +47,18 @@
                     </div>
                 </div>
             </form>
+
+            @if (Model != null && Model.errorMessages.Any())
+            {
+                <div class="flex w-full flex-col content-center p-2">
+                    @foreach (var msg in Model.errorMessages)
+                    {
+                        <div class="flex w-full flex-row border-s-4 border-solid border-red-800 bg-gray-700 p-2 text-white">
+                            @msg
+                        </div>
+                    }
+                </div>
+            }
         </div>
 
     </main>

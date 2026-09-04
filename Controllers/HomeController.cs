@@ -27,8 +27,9 @@ public class HomeController : Controller
     }
 
     [AllowAnonymous]
-    public IActionResult Landing()
+    public IActionResult Landing(string infoMessages)
     {
+
         return View();
     }
 
@@ -56,10 +57,25 @@ public class HomeController : Controller
     [AllowAnonymous]
 	public async Task<ActionResult> Register(Register request)
 	{
+        var errorMessages = ModelState.Values.SelectMany(x => x.Errors).Select(x => x.ErrorMessage).ToList();
+        if (!ModelState.IsValid)
+        {
+			return View("Register", new Register
+			{
+				errorMessages = errorMessages
+			});
+		}
+
         // activation email etc etc in the future will be nice
         var user = await _userManager.FindByEmailAsync(request.Email);
         if (user != null)
-			return StatusCode(StatusCodes.Status500InternalServerError);
+        {
+            errorMessages.Add("A User with that e-mail already exists");
+            return View("Register", new Register
+            {
+                errorMessages = errorMessages
+            });
+        }
 
 		// clean strings!
 		var newUser = new ApplicationUser
@@ -72,8 +88,15 @@ public class HomeController : Controller
         var result = await _userManager.CreateAsync(newUser, request.Password);
         // if fail, go back to register page and show why it failed
         if (!result.Succeeded)
-            return StatusCode(StatusCodes.Status500InternalServerError);
+        {
+            errorMessages.AddRange(result.Errors.Select(x => x.Description));
+            return View("Register", new Register
+            {
+                errorMessages = errorMessages
+            });
+        }
 
+        TempData["infoMessages"] = new string[] { "Registration successfull!" };
 		return RedirectToAction("Landing");
 	}
 
@@ -82,13 +105,24 @@ public class HomeController : Controller
     public async Task<ActionResult> Login(Login request)
     {
         var rememberMe = false;
+        var errorMessages = ModelState.Values.SelectMany(x => x.Errors).Select(x => x.ErrorMessage).ToList();
+
+		if (!ModelState.IsValid)
+        {
+            return View("Landing", new Login
+            {
+                errorMessages = errorMessages
+            });
+		}
+
         var result = await _signInManager.PasswordSignInAsync(
             request.Username, request.Password, isPersistent: rememberMe, lockoutOnFailure: false);
 
         if (result.Succeeded)
             return RedirectToAction("Index", "Home");
 
-        return View("Landing");
+        errorMessages.Add("Invalid Username or Password");
+        return View("Landing", new Login { errorMessages = errorMessages });
     }
 
     [AllowAnonymous]

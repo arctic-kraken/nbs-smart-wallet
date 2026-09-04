@@ -9,5 +9,7 @@ namespace nbs_smart_wallet.Models.Authentication
 
 		[Required(ErrorMessage = "Password is required")]
 		public string Password { get; set; }
+
+		public List<string> errorMessages { get; set; } = new List<string>();
 	}
 }

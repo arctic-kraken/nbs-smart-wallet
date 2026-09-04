@@ -1,5 +1,8 @@
 ﻿@{
     Layout = "";
+    string[] infoMessages = { };
+    if (TempData["infoMessages"] != null)
+        infoMessages = (string[])TempData["infoMessages"];
 }
 @model nbs_smart_wallet.Models.Authentication.Login;
 
@@ -45,6 +48,31 @@
                     </div>
                 </div>
             </form>
+
+            @if(Model != null && Model.errorMessages.Any())
+            {
+                <div class="flex w-full flex-col content-center p-2">
+                    @foreach(var msg in Model.errorMessages)
+                    {
+                        <div class="flex w-full flex-row border-s-4 border-solid border-red-800 bg-gray-700 p-2 text-white">
+                            @msg
+                        </div>
+                    }
+                </div>
+            }
+
+            @if (infoMessages != null && infoMessages.Any())
+            {
+                <div class="flex w-full flex-col content-center p-2">
+                    @foreach (var msg in infoMessages)
+                    {
+                        <div class="flex w-full flex-row border-s-4 border-solid border-blue-500 bg-gray-700 p-2 text-white">
+                            @msg
+                        </div>
+                    }
+                </div>
+            }
+            
         </div>
         
     </main>
