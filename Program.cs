@@ -60,6 +60,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddScoped<AppService>();
+builder.Services.AddScoped<ReportService>();
 builder.Services.AddScoped<RevolutProxy>();
 builder.Services.AddScoped<RevolutService>();
 
