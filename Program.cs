@@ -106,6 +106,9 @@ builder.Services.Configure<IHostApplicationLifetime>(options =>
     });
 });
 
+// This is will be the source of timezone bugs but I can handle it
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

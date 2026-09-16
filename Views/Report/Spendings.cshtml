@@ -1,10 +1,18 @@
 ﻿@{
-
+    var labels = Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Spendings.Select(x => x.BookingDate.ToString("dd")).ToList()));
+    var data = Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Spendings.Select(x => x.Balance).ToList()));
+    var currentMonthName = Model.Spendings.First().BookingDate.ToString("MMMM yyyy");
 }
 @model nbs_smart_wallet.Controllers.ReportController.SpendingsModel;
 
-<div>
-    <canvas id="myChart" class=""></canvas>
+<div class="flex w-full p-2">
+    <div class="w-1/2 p-2">
+        <canvas id="myChart" class="w-full"></canvas>
+    </div>
+    <div class="w-1/2 p-2">
+        <canvas id="myChart2" class="w-full"></canvas>
+    </div>
+    
 </div>
 
 <script src="~/lib/Chart.js/chart.umd.min.js"></script>
@@ -14,15 +22,21 @@
     const ctx = document.getElementById('myChart');
     Chart.defaults.font.family = "'Questrial', sans-serif";
     Chart.defaults.color = "#FFFFFF";
+    Chart.defaults.elements.line.fill = false;
+    Chart.defaults.elements.line.tension = 0.1;
+    Chart.defaults.elements.line.showLine = true;
+
+    const ctx2 = document.getElementById('myChart2');
 
     new Chart(ctx, {
-        type: 'bar',
+        type: 'line',
         data: {
-            labels: @Model.dayNumbers,
+            labels: @labels,
             datasets: [{
-                label: 'Current Month Balance',
-                data: @Model.currentMonthBalances,
-                borderWidth: 0
+                label: `Current Month Balance (@currentMonthName)`,
+                data: @data,
+                borderColor: "#54B947",
+                borderWidth: 2
             }]
         },
         options: {
@@ -31,7 +45,25 @@
                     beginAtZero: true
                 }
             }
+        }
+    });
 
+    new Chart(ctx2, {
+        type: 'line',
+        data: {
+            labels: @labels,
+            datasets: [{
+                label: `Current Month Balance (@currentMonthName)`,
+                data: @data,
+                borderWidth: 0,
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
         }
     });
 

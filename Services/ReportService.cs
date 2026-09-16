@@ -11,20 +11,35 @@ namespace nbs_smart_wallet.Services
 			_db = context;
 		}
 
-		public List<decimal> GetSpendingsFor(int month, int year)
+		public class DailySpendings
+		{
+			public DateTime BookingDate { get; set; }
+			public decimal Balance { get; set; }
+		}
+
+		public List<DailySpendings> GetSpendingsFor(int month, int year)
 		{
 			var startOfMonth = new DateTime(year, month, 1);
 			var endOfMonth = new DateTime(year, month, 1).AddMonths(1).AddDays(-1);
 			var trxs = _db.RevTransactions
-				.Where(x => x.BookingDateTime >= startOfMonth && x.BookingDateTime <= endOfMonth)
-				.OrderByDescending(x => x.BookingDateTime)
+				.Where(x => x.BookingDateTime.ToUniversalTime() >= startOfMonth && x.BookingDateTime.ToUniversalTime() <= endOfMonth)
+				.OrderBy(x => x.BookingDateTime.ToUniversalTime())
 				.ToList();
-			//Cannot write DateTime with Kind=Unspecified to PostgreSQL type 'timestamp with time zone', only UTC is supported. Note that it's not possible to mix DateTimes with different Kinds in an array, range, or multirange. (Parameter 'value')'
 
-
-			var amounts = trxs.Select(x => x.BalanceAmount).ToList();
-
-			return amounts;
+			trxs = trxs.DistinctBy(x => x.BookingDateTime.Date).ToList();
+			var spendings = new List<DailySpendings>();
+			foreach (var trx in trxs)
+			{
+				spendings.Add(
+					new DailySpendings
+					{
+						BookingDate = trx.BookingDateTime,
+						Balance = trx.BalanceAmount
+					}
+				);
+			}
+			
+			return spendings;
 		}
 	}
 }

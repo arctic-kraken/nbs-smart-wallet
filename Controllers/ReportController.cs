@@ -19,19 +19,14 @@ namespace nbs_smart_wallet.Controllers
 
 		public class SpendingsModel
 		{
-			public List<decimal> currentMonthBalances = new List<decimal>();
-			public List<int> dayNumbers = new List<int>();
+			public List<ReportService.DailySpendings> Spendings { get; set; } = new List<ReportService.DailySpendings>();
 		}
 
 		public IActionResult Spendings()
 		{
 			var model = new SpendingsModel();
-			model.currentMonthBalances = _serivce.GetSpendingsFor(8, 2026);
-			var endOfMonth = new DateTime(2026, 8, 1).AddMonths(1).AddDays(-1);
+			model.Spendings = _serivce.GetSpendingsFor(8, 2026);
 			
-			for (int i = 1; i <= endOfMonth.Day; i++)
-				model.dayNumbers.Add(i);
-
 			return View(model);
 		}
 	}

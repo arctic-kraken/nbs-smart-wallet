@@ -15,37 +15,3 @@
         </div>
     </a>
 </div>
-
-<div>
-    <canvas id="myChart" class=""></canvas>
-</div>
-
-<script src="~/lib/Chart.js/chart.umd.min.js"></script>
-
-<script>
-
-    const ctx = document.getElementById('myChart');
-    Chart.defaults.font.family = "'Questrial', sans-serif";
-    Chart.defaults.color = "#FFFFFF";
-
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-            datasets: [{
-                label: '# of Votes',
-                data: [12, 19, 3, 5, 2, 3],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-            
-        }
-    });
-
-</script>

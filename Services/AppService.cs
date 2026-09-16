@@ -31,5 +31,15 @@ namespace nbs_smart_wallet.Services
 			return Guid.Parse(guidStr);
 		}
 
+		//public static string GetStringListOf<T>(List<T> list)
+		//{
+		//	if (list == null)
+		//		throw new ArgumentNullException("Given list cannot be converted because it is null");
+
+		//	string str = $"[{}]";
+
+		//	return string.Empty;
+		//}
+
 	}
 }
