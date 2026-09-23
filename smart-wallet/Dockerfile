@@ -4,7 +4,7 @@ WORKDIR /app
 # Copy csproj and restore as distinct layers
 COPY *.csproj ./
 
-RUN dotnet restore /smart-wallet.csproj
+RUN dotnet restore ./smart-wallet.csproj
 
 # Copy everything else and build
 COPY . ./
