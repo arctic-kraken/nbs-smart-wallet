@@ -15,4 +15,4 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 COPY --from=build-env /app/out .
 
-ENTRYPOINT ["dotnet", "nbs-smart-wallet.dll"]
+ENTRYPOINT ["dotnet", "smart-wallet.dll"]
