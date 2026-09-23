@@ -2,9 +2,9 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build-env
 WORKDIR /app
 
 # Copy csproj and restore as distinct layers
-COPY *.csproj ./
+COPY /*.csproj ./
 
-RUN dotnet restore ./smart-wallet.csproj
+RUN dotnet restore 
 
 # Copy everything else and build
 COPY . ./
