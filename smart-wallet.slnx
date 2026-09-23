@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="smart-wallet/smart-wallet.csproj" />
+  <Project Path="wallet-tests/wallet-tests.csproj" />
+</Solution>
