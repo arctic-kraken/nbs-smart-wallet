@@ -15,13 +15,14 @@ namespace wallet_tests
 		[TestInitialize]
 		public void Init()
 		{
-			m_db.Setup<DbSet<RevAccount>>(x => x.RevAccounts)
-				.ReturnsDbSet(TestDataHelper.TestAccounts());
+			
 		}
 
 		[TestMethod]
 		public void TestMethod1()
 		{
+			m_db.Setup(x => x.RevAccounts)
+				.ReturnsDbSet(TestDataHelper.TestAccounts());
 		}
 	}
 }

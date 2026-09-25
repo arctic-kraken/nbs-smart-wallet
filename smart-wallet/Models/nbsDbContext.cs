@@ -11,11 +11,11 @@ namespace nbs_smart_wallet.Models
 	{
 		public nbsDbContext(DbContextOptions options) : base(options) { }
 
-		public DbSet<ApplicationUser> Users { get; set; }
-		public DbSet<ApplicationRole> Roles { get; set; }
-		public DbSet<RevAccount> RevAccounts { get; set; }
-		public DbSet<RevBankAccount> RevBankAccounts { get; set; }
-		public DbSet<RevTransaction> RevTransactions { get; set; }
-		public DbSet<Budget> Budgets { get; set; }
+		public virtual DbSet<ApplicationUser> Users { get; set; }
+		public virtual DbSet<ApplicationRole> Roles { get; set; }
+		public virtual DbSet<RevAccount> RevAccounts { get; set; }
+		public virtual DbSet<RevBankAccount> RevBankAccounts { get; set; }
+		public virtual DbSet<RevTransaction> RevTransactions { get; set; }
+		public virtual DbSet<Budget> Budgets { get; set; }
 	}
 }

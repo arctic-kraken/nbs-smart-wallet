@@ -39,7 +39,7 @@
                 </div>
             }
 
-            <form class="grid" asp-action="Edit" asp-controller="Budget" method="post">
+            <form class="grid" asp-action="Edit" asp-controller="Budget" asp-route-id="@Model.Id" method="post">
                 <div class="row-span-3 grid w-full grid-rows-3 gap-1">
                     <div class="content-center">
                         <input class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" asp-for="@Model.Title" type="text" placeholder="Budget Title" value="@Model.Title" />
