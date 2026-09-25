@@ -67,7 +67,7 @@ namespace nbs_smart_wallet.Services
 			var startOfMonth = new DateTime(year, month, 1);
 			var endOfMonth = new DateTime(year, month, 1).AddMonths(1).AddDays(-1);
 			var trxs = _db.RevTransactions
-				.Where(x => x.BookingDateTime.ToUniversalTime() >= startOfMonth && x.BookingDateTime.ToUniversalTime() <= endOfMonth)
+				.Where(x => x.BookingDateTime.ToUniversalTime() >= startOfMonth && x.BookingDateTime.ToUniversalTime() <= endOfMonth && x.RevAccountId == account.RevAccountId)
 				.OrderBy(x => x.BookingDateTime.ToUniversalTime())
 				.ToList();
 

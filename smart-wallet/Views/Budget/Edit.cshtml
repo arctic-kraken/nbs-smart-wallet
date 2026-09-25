@@ -52,6 +52,18 @@
                             Update Title & Amount
                         </button>
                     </div>
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <div class="flex justify-center">
+                            <a asp-action="Delete" asp-controller="Budget" asp-route-id="@Model.Id">
+                                <div class="max-w-fit rounded bg-red-700 p-2 text-white hover:cursor-pointer">
+                                    Delete Budget
+                                </div>
+                            </a>
+                        </div>
+                    }
+
                     <div class="grid grid-rows-2 content-center gap-1">
                         <div class="flex flex-wrap content-center">
                             <input id="js-clause" class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" type="text" placeholder="Clause Value"/>
@@ -61,7 +73,7 @@
                                 Add Clause
                             </button>
                         </div>
-                    </div> 
+                    </div>
 
                     <div class="m-2 grid scrollbar-none gap-2 overflow-y-scroll">
                         @{

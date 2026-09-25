@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using nbs_smart_wallet.Models;
@@ -11,9 +12,11 @@ using nbs_smart_wallet.Models;
 namespace nbs_smart_wallet.Migrations
 {
     [DbContext(typeof(nbsDbContext))]
-    partial class nbsDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260925151907_Added User Roles")]
+    partial class AddedUserRoles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,11 +34,6 @@ namespace nbs_smart_wallet.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("text");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasMaxLength(21)
-                        .HasColumnType("character varying(21)");
-
                     b.Property<string>("Name")
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
@@ -51,10 +49,6 @@ namespace nbs_smart_wallet.Migrations
                         .HasDatabaseName("RoleNameIndex");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityRole");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -386,13 +380,6 @@ namespace nbs_smart_wallet.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Budgets");
-                });
-
-            modelBuilder.Entity("smart_wallet.Models.Authentication.ApplicationRole", b =>
-                {
-                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityRole");
-
-                    b.HasDiscriminator().HasValue("ApplicationRole");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

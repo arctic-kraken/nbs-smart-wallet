@@ -95,5 +95,17 @@ namespace nbs_smart_wallet.Services
 
 			return true;
 		}
+
+		public bool DeleteBudget(int id)
+		{
+			var budget = GetBudget(id);
+			if (budget == null)
+				return false;
+
+			_db.Budgets.Remove(budget);
+			_db.SaveChanges();
+
+			return true;
+		}
 	}
 }

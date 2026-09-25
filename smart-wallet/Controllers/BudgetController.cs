@@ -57,6 +57,7 @@ namespace nbs_smart_wallet.Controllers
 
 		[HttpGet]
 		[Route("/Budget/Edit/{id}/DeleteClause/{clause}")]
+		[Authorize(Roles = "Admin")]
 		public IActionResult DeleteClause(int id, string clause)
 		{
 			if (!_service.DeleteClauseFromBudget(id, clause))
@@ -65,6 +66,18 @@ namespace nbs_smart_wallet.Controllers
 				TempData["infoMessages"] = new string[] { $"Clause removed successfully!" };
 
 			return Redirect($"/Budget/Edit/{id}");
+		}
+
+		[HttpGet]
+		[Authorize(Roles = "Admin")]
+		public IActionResult Delete(int id)
+		{
+			if (!_service.DeleteBudget(id))
+				TempData["errorMessages"] = new string[] { $"Failed to remove budget" };
+			else
+				TempData["infoMessages"] = new string[] { $"Budget removed successfully!" };
+
+			return RedirectToAction("List");
 		}
 	}
 }

@@ -30,21 +30,19 @@
                     </div>
                 </div>
             </a>
-            @* <a class="" asp-controller="Home" asp-action="Privacy">
-                <div class="w-full rounded p-2 hover:cursor-pointer hover:bg-gray-800">
-                    Privacy
-                </div>
-            </a> *@
-            <a class="w-full" asp-controller="Revolut" asp-action="Accounts">
-                <div class="inline-flex w-full rounded p-2 hover:cursor-pointer hover:bg-gray-800">
-                    <div class="mr-2 content-center">
-                        <img class="size-6 invert-[100%]" src="~/img/icons/accounts.svg">
+            @if (User.IsInRole("Admin"))
+            {
+                <a class="w-full" asp-controller="Revolut" asp-action="Accounts">
+                    <div class="inline-flex w-full rounded p-2 hover:cursor-pointer hover:bg-gray-800">
+                        <div class="mr-2 content-center">
+                            <img class="size-6 invert-[100%]" src="~/img/icons/accounts.svg">
+                        </div>
+                        <div class="">
+                            Accounts
+                        </div>
                     </div>
-                    <div class="">
-                        Accounts
-                    </div>
-                </div>
-            </a>
+                </a>
+            }
             <a class="w-full" asp-controller="Report" asp-action="AccountList">
                 <div class="inline-flex w-full rounded p-2 hover:cursor-pointer hover:bg-gray-800">
                     <div class="mr-2 content-center">

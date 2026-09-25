@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using NpgsqlTypes;
 using Serilog;
 using Serilog.Sinks.PostgreSQL;
+using smart_wallet.Models.Authentication;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -49,8 +50,9 @@ builder.Services.AddDbContext<nbsDbContext>(options =>
 });
 
 builder.Services.AddAuthorization();
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+builder.Services.AddIdentity<ApplicationUser, ApplicationRole>()
     .AddEntityFrameworkStores<nbsDbContext>()
+    .AddRoles<ApplicationRole>()
     .AddDefaultTokenProviders();
 
 builder.Services.ConfigureApplicationCookie(options =>
@@ -141,6 +143,19 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<nbsDbContext>();
     await db.Database.MigrateAsync();
+
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+    string[] roles = ["Admin", "Regular"];
+
+	foreach (var role in roles)
+	{
+		if (!await roleManager.RoleExistsAsync(role))
+		{
+			await roleManager.CreateAsync(new ApplicationRole { 
+                Name = role,
+            });
+		}
+	}
 }
 
 app.Run();

@@ -6,6 +6,7 @@ using nbs_smart_wallet.Models.Authentication;
 using nbs_smart_wallet.Services;
 using Newtonsoft.Json;
 using Serilog;
+using smart_wallet.Models.Authentication;
 using System.Diagnostics;
 
 namespace nbs_smart_wallet.Controllers;
@@ -15,10 +16,12 @@ public class HomeController : Controller
 {
     private SignInManager<ApplicationUser> _signInManager;
     private UserManager<ApplicationUser> _userManager;
-    public HomeController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
+    private RoleManager<ApplicationRole> _roleManager;
+    public HomeController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
     {
         _signInManager = signInManager;
         _userManager = userManager;
+        _roleManager = roleManager;
     }
 
     public IActionResult Index()
@@ -95,6 +98,16 @@ public class HomeController : Controller
                 errorMessages = errorMessages
             });
         }
+
+        var addRoleResult = await _userManager.AddToRoleAsync(newUser, "Admin");
+        if (!addRoleResult.Succeeded)
+        {
+			errorMessages.AddRange(result.Errors.Select(x => x.Description));
+			return View("Register", new Register
+			{
+				errorMessages = errorMessages
+			});
+		}
 
         TempData["infoMessages"] = new string[] { "Registration successfull!" };
 		return RedirectToAction("Landing");

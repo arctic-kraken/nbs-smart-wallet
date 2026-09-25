@@ -11,7 +11,7 @@ using System.Diagnostics;
 
 namespace nbs_smart_wallet.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Admin")]
 public class RevolutController : Controller
 {
     private RevolutProxy _revolutProxy;
