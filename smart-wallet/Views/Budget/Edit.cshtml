@@ -1,0 +1,110 @@
+﻿@{
+    string[] errorMessages = { };
+    if (TempData["errorMessages"] != null)
+        errorMessages = (string[])TempData["errorMessages"];
+
+    string[] infoMessages = { };
+    if (TempData["infoMessages"] != null)
+        infoMessages = (string[])TempData["infoMessages"];
+
+}
+@using Newtonsoft.Json;
+@model smart_wallet.Models.DbSets.Budget
+
+<main class="flex min-h-[50em] flex-wrap content-center">
+    <div class="w-full max-w-[20em] rounded bg-gray-800 p-5">
+        @if (Model != null)
+        {
+            @if (errorMessages != null && errorMessages.Any())
+            {
+                <div class="flex w-full flex-col content-center p-2">
+                    @foreach (var msg in errorMessages)
+                    {
+                        <div class="flex w-full flex-row border-s-4 border-solid border-red-800 bg-gray-700 p-2 text-white">
+                            @msg
+                        </div>
+                    }
+                </div>
+            }
+
+            @if (infoMessages != null && infoMessages.Any())
+            {
+                <div class="flex w-full flex-col content-center p-2">
+                    @foreach (var msg in infoMessages)
+                    {
+                        <div class="flex w-full flex-row border-s-4 border-solid border-blue-500 bg-gray-700 p-2 text-white">
+                            @msg
+                        </div>
+                    }
+                </div>
+            }
+
+            <form class="grid" asp-action="Edit" asp-controller="Budget" method="post">
+                <div class="row-span-3 grid w-full grid-rows-3 gap-1">
+                    <div class="content-center">
+                        <input class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" asp-for="@Model.Title" type="text" placeholder="Budget Title" value="@Model.Title" />
+                    </div>
+                    <div class="content-center">
+                        <input class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" asp-for="@Model.Amount" type="number" placeholder="Amount" value="@Model.Amount" />
+                    </div>
+                    <div class="flex justify-center">
+                        <button class="max-w-fit rounded bg-white p-2 text-black hover:cursor-pointer" type="submit">
+                            Update Title & Amount
+                        </button>
+                    </div>
+                    <div class="grid grid-rows-2 content-center gap-1">
+                        <div class="flex flex-wrap content-center">
+                            <input id="js-clause" class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" type="text" placeholder="Clause Value"/>
+                        </div>
+                        <div class="flex justify-center">
+                            <button class="max-w-fit rounded bg-white p-2 text-black hover:cursor-pointer" type="button" onclick="addClause();">
+                                Add Clause
+                            </button>
+                        </div>
+                    </div> 
+
+                    <div class="m-2 grid scrollbar-none gap-2 overflow-y-scroll">
+                        @{
+                            var clauses = JsonConvert.DeserializeObject<List<string>>(Model.Clauses);
+                            if (clauses != null)
+                            {
+                                foreach (var c in clauses)
+                                {
+                                    <div class="inline-flex justify-evenly gap-2 rounded bg-gray-700 p-0">
+                                        <div class="flex flex-wrap content-center">
+                                            @c
+                                        </div>
+                                        
+                                    </div>
+                                }
+                            }
+                        }
+                        
+                    </div>
+                </div>
+            </form>
+
+            
+        } else
+        {
+            <div class="flex w-full flex-col content-center p-2">
+                <div class="flex w-full flex-row border-s-4 border-solid border-red-800 bg-gray-700 p-2 text-white">
+                    Budget Not Found
+                </div>
+            </div>
+        }
+    </div>
+</main>
+
+<script type="text/javascript">
+
+    function addClause() {
+        let clause = document.getElementById("js-clause").value;
+        console.log(window.location.href);
+        let link = window.location.href + "/AddClause/" + clause;
+        window.location.href = link;
+        // fetch(window.location.href + "/AddClause/" + clause, { 'redirect': 'follow' });
+    }
+
+</script>
+

@@ -1,0 +1,58 @@
+﻿@{
+    string[] infoMessages = { };
+    if (TempData["infoMessages"] != null)
+        infoMessages = (string[])TempData["infoMessages"];
+}
+@model List<smart_wallet.Models.DbSets.Budget>
+
+
+<a class="" asp-controller="Budget" asp-action="Edit">
+    <div class="inline-flex rounded bg-white p-2 text-black hover:cursor-pointer">
+        <div class="content-center">
+            Add
+        </div>
+    </div>
+</a>
+
+
+<main role="main" class="h-full min-h-[50em] w-2/3 content-center" style="margin: 0em auto">
+    @if (infoMessages != null && infoMessages.Any())
+    {
+        <div class="flex w-full flex-col content-center p-2">
+            @foreach (var msg in infoMessages)
+            {
+                <div class="flex w-full flex-row border-s-4 border-solid border-blue-500 bg-gray-700 p-2 text-white">
+                    @msg
+                </div>
+            }
+        </div>
+    }
+    <div class="m-2 grid scrollbar-none gap-2 overflow-y-scroll">
+        @foreach (var b in Model)
+        {
+            <div class="inline-flex justify-evenly gap-2 rounded bg-gray-800 p-2">
+                <div>
+                    @if (String.IsNullOrEmpty(b.Title))
+                    {
+                        <span>Empty Budget Name</span>
+                    }
+                    else
+                    {
+                        <span>@b.Title</span>
+                    }
+                </div>
+                <div>
+                    @b.Amount
+                </div>
+                <div class="inline-flex flex-wrap content-center">
+                    <a asp-action="Edit" asp-controller="Budget" asp-route-id="@b.Id">
+                        <div>
+                            <img class="size-6 invert-[100%]" src="~/img/icons/arrow-right-circle.svg">
+                        </div>
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+
+</main>

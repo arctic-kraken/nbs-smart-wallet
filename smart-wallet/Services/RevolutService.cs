@@ -115,9 +115,9 @@ namespace nbs_smart_wallet.Services
 				_db.RevTransactions.Add(new RevTransaction
 				{
 					RevAccountId = Guid.Parse("6c27fab0-1624-424a-97a2-b3ff77eeb272"),
-					Amount = rng.NextInt64(),
+					Amount = rng.Next(1, 999),
 					Currency = AppConsts.Currency.BritishPound,
-					BalanceAmount = rng.NextInt64(),
+					BalanceAmount = rng.Next(100, 9999),
 					BalanceCurrency = AppConsts.Currency.BritishPound,
 					BookingDateTime = date,
 					ValueDateTime = date,

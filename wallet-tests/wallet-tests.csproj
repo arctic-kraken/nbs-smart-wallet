@@ -9,4 +9,12 @@
     <UseVSTest>true</UseVSTest>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Moq.EntityFrameworkCore" Version="10.0.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\smart-wallet\smart-wallet.csproj" />
+  </ItemGroup>
+
 </Project>

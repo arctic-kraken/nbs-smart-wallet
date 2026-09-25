@@ -7,9 +7,9 @@ namespace nbs_smart_wallet.Controllers
 	[Authorize]
 	public class ReportController : Controller
 	{
-		private ReportService _serivce;
+		private ReportService _service;
 		public ReportController(ReportService reportService) {
-			_serivce = reportService;
+			_service = reportService;
 		}
 
 		public IActionResult Index()
@@ -25,7 +25,8 @@ namespace nbs_smart_wallet.Controllers
 		public IActionResult Spendings()
 		{
 			var model = new SpendingsModel();
-			model.Spendings = _serivce.GetSpendingsFor(8, 2026);
+			
+			model.Spendings = _service.GetSpendingsFor(DateTime.UtcNow.Month, DateTime.UtcNow.Year);
 			
 			return View(model);
 		}

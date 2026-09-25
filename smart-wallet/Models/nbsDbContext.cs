@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using nbs_smart_wallet.Models.Authentication;
 using nbs_smart_wallet.Models.DbSets;
+using smart_wallet.Models.DbSets;
 
 namespace nbs_smart_wallet.Models
 {
@@ -13,5 +14,6 @@ namespace nbs_smart_wallet.Models
 		public DbSet<RevAccount> RevAccounts { get; set; }
 		public DbSet<RevBankAccount> RevBankAccounts { get; set; }
 		public DbSet<RevTransaction> RevTransactions { get; set; }
+		public DbSet<Budget> Budgets { get; set; }
 	}
 }
