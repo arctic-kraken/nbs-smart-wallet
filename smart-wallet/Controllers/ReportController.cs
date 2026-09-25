@@ -8,8 +8,10 @@ namespace nbs_smart_wallet.Controllers
 	public class ReportController : Controller
 	{
 		private ReportService _service;
-		public ReportController(ReportService reportService) {
+		private RevolutService _revolut;
+		public ReportController(ReportService reportService, RevolutService revolutService) {
 			_service = reportService;
+			_revolut = revolutService;
 		}
 
 		public IActionResult Index()
@@ -20,13 +22,27 @@ namespace nbs_smart_wallet.Controllers
 		public class SpendingsModel
 		{
 			public List<ReportService.DailySpendings> Spendings { get; set; } = new List<ReportService.DailySpendings>();
+			public List<ReportService.BudgetSpendings> BudgetSpending { get; set; } = new List<ReportService.BudgetSpendings>();
 		}
 
-		public IActionResult Spendings()
+		[HttpGet]
+		public IActionResult AccountList()
+		{
+			return View(_revolut.GetAccounts());
+		}
+
+		[HttpGet]
+		public IActionResult Spendings(int id)
 		{
 			var model = new SpendingsModel();
-			
-			model.Spendings = _service.GetSpendingsFor(DateTime.UtcNow.Month, DateTime.UtcNow.Year);
+			var account = _revolut.GetAccount(id);
+			if (account == null)
+			{
+				return NotFound();
+			}
+
+			model.Spendings = _service.GetSpendingsFor(account.RevAccountId, DateTime.UtcNow.Month, DateTime.UtcNow.Year);
+			model.BudgetSpending = _service.GetBudgetSpendingFor(account.RevAccountId, DateTime.UtcNow.Month, DateTime.UtcNow.Year);
 			
 			return View(model);
 		}

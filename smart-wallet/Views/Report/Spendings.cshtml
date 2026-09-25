@@ -1,16 +1,24 @@
 ﻿@{
     var labels = Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Spendings.Select(x => x.BookingDate.ToString("dd")).ToList()));
     var data = Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Spendings.Select(x => x.Balance).ToList()));
-    var currentMonthName = Model.Spendings.First().BookingDate.ToString("MMMM yyyy");
+    var currentMonthName = DateTime.UtcNow.ToString("MMMM yyyy");
+    
+    var budgetLables = Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.BudgetSpending.Select(x => x.BudgetName).ToList()));
+    var budgetData = Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.BudgetSpending.Select(x => x.BudgetTotal).ToList()));
+
 }
 @model nbs_smart_wallet.Controllers.ReportController.SpendingsModel;
+
+<div>
+    @currentMonthName
+</div>
 
 <div class="flex w-full p-2">
     <div class="w-1/2 p-2">
         <canvas id="myChart" class="w-full"></canvas>
     </div>
-    <div class="w-1/2 p-2">
-        <canvas id="myChart2" class="w-full"></canvas>
+    <div class="max-h-1/2 w-1/2 p-2">
+        <canvas id="budget_pie" class="w-full"></canvas>
     </div>
     
 </div>
@@ -26,14 +34,14 @@
     Chart.defaults.elements.line.tension = 0.1;
     Chart.defaults.elements.line.showLine = true;
 
-    const ctx2 = document.getElementById('myChart2');
+    const ctx2 = document.getElementById('budget_pie');
 
     new Chart(ctx, {
         type: 'line',
         data: {
             labels: @labels,
             datasets: [{
-                label: `Current Month Balance (@currentMonthName)`,
+                label: `Balance over the month`,
                 data: @data,
                 borderColor: "#54B947",
                 borderWidth: 2
@@ -49,22 +57,16 @@
     });
 
     new Chart(ctx2, {
-        type: 'line',
+        type: 'pie',
         data: {
-            labels: @labels,
+            labels: @budgetLables,
             datasets: [{
-                label: `Current Month Balance (@currentMonthName)`,
-                data: @data,
+                label: `Budget Spendings over the month`,
+                data: @budgetData,
                 borderWidth: 0,
             }]
         },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
+        
     });
 
 </script>

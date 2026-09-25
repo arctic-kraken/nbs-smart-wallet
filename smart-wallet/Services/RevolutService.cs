@@ -188,6 +188,13 @@ namespace nbs_smart_wallet.Services
 
 			return accounts;
 		}
+		public RevAccount? GetAccount(int id)
+		{
+			var userId = _app.WhoIsCurrentUser();
+			var account = _db.RevAccounts.FirstOrDefault(x => x.AspNetUserId == userId && x.Id == id);
+
+			return account;
+		}
 
 		/// <summary>
 		/// Fetches Accounts from Revolut and Updates them in the database

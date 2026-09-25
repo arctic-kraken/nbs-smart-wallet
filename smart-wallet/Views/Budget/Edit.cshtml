@@ -74,7 +74,11 @@
                                         <div class="flex flex-wrap content-center">
                                             @c
                                         </div>
-                                        
+                                        <a href="/Budget/Edit/@Model.Id/DeleteClause/@c">
+                                            <div>
+                                                X
+                                            </div>
+                                        </a>
                                     </div>
                                 }
                             }
@@ -103,7 +107,6 @@
         console.log(window.location.href);
         let link = window.location.href + "/AddClause/" + clause;
         window.location.href = link;
-        // fetch(window.location.href + "/AddClause/" + clause, { 'redirect': 'follow' });
     }
 
 </script>

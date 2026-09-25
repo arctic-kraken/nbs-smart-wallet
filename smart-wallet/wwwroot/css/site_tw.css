@@ -585,6 +585,9 @@
   .h-full {
     height: 100%;
   }
+  .max-h-1\/2 {
+    max-height: calc(1 / 2 * 100%);
+  }
   .max-h-full {
     max-height: 100%;
   }

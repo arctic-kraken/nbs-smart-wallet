@@ -75,5 +75,25 @@ namespace nbs_smart_wallet.Services
 
 			return true;
 		}
+
+		public bool DeleteClauseFromBudget(int id, string clause)
+		{
+			if (String.IsNullOrEmpty(clause))
+				return false;
+
+			var budget = GetBudget(id);
+			if (budget == null)
+				return false;
+
+			var clauses = JsonConvert.DeserializeObject<List<string>>(budget.Clauses);
+			if (clauses == null)
+				clauses = new List<string>();
+
+			clauses.Remove(clause);
+			budget.Clauses = JsonConvert.SerializeObject(clauses);
+			_db.SaveChanges();
+
+			return true;
+		}
 	}
 }

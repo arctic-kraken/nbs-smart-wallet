@@ -54,5 +54,17 @@ namespace nbs_smart_wallet.Controllers
 
 			return Redirect($"/Budget/Edit/{id}");
 		}
+
+		[HttpGet]
+		[Route("/Budget/Edit/{id}/DeleteClause/{clause}")]
+		public IActionResult DeleteClause(int id, string clause)
+		{
+			if (!_service.DeleteClauseFromBudget(id, clause))
+				TempData["errorMessages"] = new string[] { $"Failed to remove clause: {clause}" };
+			else
+				TempData["infoMessages"] = new string[] { $"Clause removed successfully!" };
+
+			return Redirect($"/Budget/Edit/{id}");
+		}
 	}
 }
