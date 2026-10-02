@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -179,8 +180,9 @@ namespace wallet_tests
 		{
 			var accessor = new Mock<IHttpContextAccessor>();
 			var userManager = PrepAndGetUserManagerMoq();
+			var protecionProvider = new Mock<IDataProtectionProvider>();
 
-			return new Mock<AppService>(accessor.Object, userManager.Object);
+			return new Mock<AppService>(accessor.Object, userManager.Object, protecionProvider.Object);
 		}
 	}
 }
