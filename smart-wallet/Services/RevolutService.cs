@@ -176,8 +176,6 @@ namespace nbs_smart_wallet.Services
 				TransactionInformation = trx.TransactionInformation
 			});
 			_db.SaveChanges();
-
-			//return true;
 		}
 
 		public List<RevAccount> GetAccounts()

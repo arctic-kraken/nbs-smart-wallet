@@ -269,10 +269,10 @@ namespace nbs_smart_wallet.Services
 			};
 			// TODO - encrypt these cookies and decrypt etc etc
 			if (!String.IsNullOrEmpty(access_token))
-				_accessor.HttpContext?.Response.Cookies.Append(_config.access_token_cookie_name, access_token, options);
+				_accessor.HttpContext?.Response.Cookies.Append(_config.access_token_cookie_name, _app.Encrypt(access_token), options);
 
 			if (!String.IsNullOrEmpty(refresh_token))
-				_accessor.HttpContext?.Response.Cookies.Append(_config.refresh_token_cookie_name, refresh_token, options);
+				_accessor.HttpContext?.Response.Cookies.Append(_config.refresh_token_cookie_name, _app.Encrypt(refresh_token), options);
 		}
 
 		private string GetAccessTokenFromCookie()
@@ -281,7 +281,7 @@ namespace nbs_smart_wallet.Services
 				return string.Empty;
 			var a_token = _accessor.HttpContext.Request.Cookies.SingleOrDefault(x => x.Key == _config.access_token_cookie_name);
 			
-			return a_token.Value;
+			return _app.Decrypt(a_token.Value);
 		}
 
 		private string GetRefreshTokenFromCookie()
@@ -290,7 +290,7 @@ namespace nbs_smart_wallet.Services
 				return string.Empty;
 			var a_token = _accessor.HttpContext.Request.Cookies.SingleOrDefault(x => x.Key == _config.refresh_token_cookie_name);
 
-			return a_token.Value;
+			return _app.Decrypt(a_token.Value);
 		}
 
 		public bool IsLoggedIntoRevolut()

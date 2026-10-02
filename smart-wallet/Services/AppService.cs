@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AspNetCoreGeneratedDocument;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Identity;
 using nbs_smart_wallet.Models.Authentication;
 using Serilog;
 
@@ -8,10 +10,12 @@ namespace nbs_smart_wallet.Services
 	{
 		private IHttpContextAccessor _accessor;
 		private UserManager<ApplicationUser> _userManager;
-		public AppService(IHttpContextAccessor contextAccessor, UserManager<ApplicationUser> userManager)
+		private readonly IDataProtector _protector;
+		public AppService(IHttpContextAccessor contextAccessor, UserManager<ApplicationUser> userManager, IDataProtectionProvider protectionProvider)
 		{
 			_accessor = contextAccessor;
 			_userManager = userManager;
+			_protector = protectionProvider.CreateProtector("AppProtection");
 		}
 
 		public virtual Guid WhoIsCurrentUser()
@@ -31,15 +35,23 @@ namespace nbs_smart_wallet.Services
 			return Guid.Parse(guidStr);
 		}
 
-		//public static string GetStringListOf<T>(List<T> list)
-		//{
-		//	if (list == null)
-		//		throw new ArgumentNullException("Given list cannot be converted because it is null");
+		public string Encrypt(string plainText)
+		{
+			return _protector.Protect(plainText);
+		}
 
-		//	string str = $"[{}]";
-
-		//	return string.Empty;
-		//}
+		public string Decrypt(string encryptedText)
+		{
+			try
+			{
+				return _protector.Unprotect(encryptedText);
+			} catch (Exception ex)
+			{
+				Log.Error(ex, "Decryption Failed for {text}", encryptedText);
+				return "Decryption Failed";
+			}
+			
+		}
 
 	}
 }
