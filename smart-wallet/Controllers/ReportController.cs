@@ -24,6 +24,7 @@ namespace nbs_smart_wallet.Controllers
 			public List<ReportService.DailySpendings> Spendings { get; set; } = new List<ReportService.DailySpendings>();
 			public List<ReportService.BudgetSpendings> BudgetSpending { get; set; } = new List<ReportService.BudgetSpendings>();
 			public List<ReportService.BudgetSpendings> BudgetIncome { get; set; } = new List<ReportService.BudgetSpendings>();
+			public List<ReportService.IndicatorTotal> IndicatorTotals { get; set; } = new List<ReportService.IndicatorTotal>();
 			public int selectedMonth { get; set; }
 			public int selectedYear { get; set; }
 			public int AccountId { get; set; }
@@ -57,6 +58,7 @@ namespace nbs_smart_wallet.Controllers
 			model.Spendings = _service.GetSpendingsFor(account.RevAccountId, (int)month, (int)year);
 			model.BudgetSpending = _service.GetBudgetSpendingFor(account.RevAccountId, (int)month, (int)year);
 			model.BudgetIncome = _service.GetBudgetIncomeFor(account.RevAccountId, (int)month, (int)year);
+			model.IndicatorTotals = _service.GetCreditDebitTotal(account.RevAccountId, (int)month, (int)year);
 			
 			return View(model);
 		}

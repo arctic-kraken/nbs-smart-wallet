@@ -8,6 +8,9 @@
     var incomeLables = Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.BudgetIncome.Select(x => x.BudgetName).ToList()));
     var incomeData = Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.BudgetIncome.Select(x => x.BudgetTotal).ToList()));
 
+    var indicatorLables = Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.IndicatorTotals.Select(x => x.IndicatorName).ToList()));
+    var indicatorData = Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.IndicatorTotals.Select(x => x.TotalSum).ToList()));
+
     var monthNames = new List<string>();
     for (int i = 1; i <= 12; i++)
         monthNames.Add(new DateTime(2000, i, 1).ToString("MMMM"));
@@ -59,6 +62,9 @@
         <div class="h-1/2 w-1/2 content-center p-2">
             <canvas id="budget_pie_income" class="w-full"></canvas>
         </div>
+        <div class="w-1/2 content-center p-2">
+            <canvas id="creditsdebits" class="w-full"></canvas>
+        </div>
     </div>
 </div>
 
@@ -75,6 +81,7 @@
 
     const ctx2 = document.getElementById('budget_pie');
     const ctx3 = document.getElementById('budget_pie_income');
+    const ctx4 = document.getElementById('creditsdebits');
 
     new Chart(ctx, {
         type: 'line',
@@ -120,6 +127,33 @@
             }]
         },
 
+    });
+
+    new Chart(ctx4, {
+        type: 'bar',
+        data: {
+            labels: @indicatorLables,
+            datasets: [{
+                label: `Credit and Debit Totals over the month`,
+                data: @indicatorData,
+                backgroundColor: [
+                    '#c10007',
+                    '#54B947'
+                ],
+                borderColor: [
+                    '#c10007',
+                    '#54B947'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
     });
 
 </script>

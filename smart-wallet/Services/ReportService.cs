@@ -27,6 +27,42 @@ namespace nbs_smart_wallet.Services
 			public decimal BudgetTotal { get; set; }
 		}
 
+		public class IndicatorTotal
+		{
+			public string IndicatorName { get; set; }
+			public decimal TotalSum { get; set; }
+		}
+
+		public List<IndicatorTotal> GetCreditDebitTotal(Guid revAccountId, int month, int year)
+		{
+			var userId = _app.WhoIsCurrentUser();
+			var account = _db.RevAccounts.FirstOrDefault(x => x.AspNetUserId == userId && x.RevAccountId == revAccountId);
+			if (account == null)
+				return new List<IndicatorTotal>();
+
+			var startOfMonth = new DateTime(year, month, 1);
+			var endOfMonth = new DateTime(year, month, 1).AddMonths(1).AddDays(-1);
+			var debitTrxs = _db.RevTransactions
+				.Where(x => x.BookingDateTime.ToUniversalTime() >= startOfMonth && x.BookingDateTime.ToUniversalTime() <= endOfMonth
+				&& x.RevAccountId == account.RevAccountId && x.CreditDebitIndicator == AppConsts.CreditDebitIndicator.Debit)
+				.OrderBy(x => x.BookingDateTime.ToUniversalTime())
+				.ToList();
+
+			var creditTrxs = _db.RevTransactions
+				.Where(x => x.BookingDateTime.ToUniversalTime() >= startOfMonth && x.BookingDateTime.ToUniversalTime() <= endOfMonth
+				&& x.RevAccountId == account.RevAccountId && x.CreditDebitIndicator == AppConsts.CreditDebitIndicator.Credit)
+				.OrderBy(x => x.BookingDateTime.ToUniversalTime())
+				.ToList();
+
+
+
+			return new List<IndicatorTotal>
+			{
+				new IndicatorTotal { IndicatorName = "Total Credits", TotalSum = creditTrxs.Select(x => x.Amount).Sum() },
+				new IndicatorTotal { IndicatorName = "Total Debits", TotalSum = debitTrxs.Select(x => x.Amount).Sum() }
+			};
+		}
+
 		public List<DailySpendings> GetSpendingsFor(Guid revAccountId, int month, int year)
 		{
 			var userId = _app.WhoIsCurrentUser();
