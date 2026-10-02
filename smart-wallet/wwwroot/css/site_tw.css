@@ -580,6 +580,12 @@
   .h-100 {
     height: calc(var(--spacing) * 100);
   }
+  .h-\[30em\] {
+    height: 30em;
+  }
+  .h-\[50vh\] {
+    height: 50vh;
+  }
   .h-\[200px\] {
     height: 200px;
   }
@@ -597,6 +603,9 @@
   }
   .min-h-\[80vh\] {
     min-height: 80vh;
+  }
+  .min-h-\[100vh\] {
+    min-height: 100vh;
   }
   .min-h-lvh {
     min-height: 100lvh;
@@ -621,6 +630,9 @@
   }
   .w-100 {
     width: calc(var(--spacing) * 100);
+  }
+  .w-\[80\%\] {
+    width: 80%;
   }
   .w-\[100px\] {
     width: 100px;

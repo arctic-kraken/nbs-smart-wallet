@@ -11,104 +11,109 @@
 @using Newtonsoft.Json;
 @model smart_wallet.Models.DbSets.Budget
 
-<main class="flex min-h-[50em] flex-wrap content-center">
-    <div class="w-full max-w-[20em] rounded bg-gray-800 p-5">
-        @if (Model != null)
-        {
-            @if (errorMessages != null && errorMessages.Any())
-            {
-                <div class="flex w-full flex-col content-center p-2">
-                    @foreach (var msg in errorMessages)
+<main class="flex min-h-[50em] w-[80%] flex-wrap content-center">
+    <div class="inline-flex h-[30em] w-full gap-2 rounded bg-gray-800 p-2">
+        <div class="w-full p-2">
+            <div class="">
+                @if (Model != null)
+                {
+                    @if (errorMessages != null && errorMessages.Any())
                     {
-                        <div class="flex w-full flex-row border-s-4 border-solid border-red-800 bg-gray-700 p-2 text-white">
-                            @msg
-                        </div>
-                    }
-                </div>
-            }
-
-            @if (infoMessages != null && infoMessages.Any())
-            {
-                <div class="flex w-full flex-col content-center p-2">
-                    @foreach (var msg in infoMessages)
-                    {
-                        <div class="flex w-full flex-row border-s-4 border-solid border-blue-500 bg-gray-700 p-2 text-white">
-                            @msg
-                        </div>
-                    }
-                </div>
-            }
-
-            <form class="grid" asp-action="Edit" asp-controller="Budget" asp-route-id="@Model.Id" method="post">
-                <div class="row-span-3 grid w-full grid-rows-3 gap-1">
-                    <div class="content-center">
-                        <input class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" asp-for="@Model.Title" type="text" placeholder="Budget Title" value="@Model.Title" />
-                    </div>
-                    <div class="content-center">
-                        <input class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" asp-for="@Model.Amount" type="number" placeholder="Amount" value="@Model.Amount" />
-                    </div>
-                    <div class="flex justify-center">
-                        <button class="max-w-fit rounded bg-white p-2 text-black hover:cursor-pointer" type="submit">
-                            Update Title & Amount
-                        </button>
-                    </div>
-
-                    @if (User.IsInRole("Admin"))
-                    {
-                        <div class="flex justify-center">
-                            <a asp-action="Delete" asp-controller="Budget" asp-route-id="@Model.Id">
-                                <div class="max-w-fit rounded bg-red-700 p-2 text-white hover:cursor-pointer">
-                                    Delete Budget
-                                </div>
-                            </a>
-                        </div>
-                    }
-
-                    <div class="grid grid-rows-2 content-center gap-1">
-                        <div class="flex flex-wrap content-center">
-                            <input id="js-clause" class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" type="text" placeholder="Clause Value"/>
-                        </div>
-                        <div class="flex justify-center">
-                            <button class="max-w-fit rounded bg-white p-2 text-black hover:cursor-pointer" type="button" onclick="addClause();">
-                                Add Clause
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="m-2 grid scrollbar-none gap-2 overflow-y-scroll">
-                        @{
-                            var clauses = JsonConvert.DeserializeObject<List<string>>(Model.Clauses);
-                            if (clauses != null)
+                        <div class="flex w-full flex-col content-center p-2">
+                            @foreach (var msg in errorMessages)
                             {
-                                foreach (var c in clauses)
+                                <div class="flex w-full flex-row border-s-4 border-solid border-red-800 bg-gray-700 p-2 text-white">
+                                    @msg
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    @if (infoMessages != null && infoMessages.Any())
+                    {
+                        <div class="flex w-full flex-col content-center p-2">
+                            @foreach (var msg in infoMessages)
+                            {
+                                <div class="flex w-full flex-row border-s-4 border-solid border-blue-500 bg-gray-700 p-2 text-white">
+                                    @msg
+                                </div>
+                            }
+                        </div>
+                    }
+
+                    <form class="grid" asp-action="Edit" asp-controller="Budget" asp-route-id="@Model.Id" method="post">
+                        <div class="row-span-3 grid w-full grid-rows-3 gap-1">
+                            <div class="content-center">
+                                <span class="">Title: </span>
+                                <input class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" asp-for="@Model.Title" type="text" placeholder="Budget Title" value="@Model.Title" />
+                            </div>
+                            <div class="content-center">
+                                <span class="">Amount: </span>
+                                <input class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" asp-for="@Model.Amount" type="number" placeholder="Amount" value="@Model.Amount" />
+                            </div>
+                            <div class="flex justify-center gap-3 p-2">
+                                <button class="max-w-fit rounded bg-white p-2 text-black hover:cursor-pointer" type="submit">
+                                    Update Title & Amount
+                                </button>
+                                @if (User.IsInRole("Admin"))
                                 {
-                                    <div class="inline-flex justify-evenly gap-2 rounded bg-gray-700 p-0">
-                                        <div class="flex flex-wrap content-center">
-                                            @c
-                                        </div>
+                                    <a class="max-w-fit content-center rounded bg-red-700 p-2 text-white hover:cursor-pointer" asp-action="Delete" asp-controller="Budget" asp-route-id="@Model.Id">
+                                        Delete Budget
+                                    </a>
+                                }
+                            </div>
+                            <div class="grid grid-rows-2 content-center gap-1">
+                                <div class="flex flex-wrap content-center">
+                                    <input id="js-clause" class="flex w-full rounded bg-white pr-[10px] pl-[10px] text-black" type="text" placeholder="Clause Value" />
+                                </div>
+                                <div class="flex justify-center">
+                                    <button class="max-w-fit rounded bg-white p-2 text-black hover:cursor-pointer" type="button" onclick="addClause();">
+                                        Add Clause
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <div class="flex w-full flex-col content-center p-2">
+                        <div class="flex w-full flex-row border-s-4 border-solid border-red-800 bg-gray-700 p-2 text-white">
+                            Budget Not Found
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="w-full p-2">
+            <div>
+                Clauses:
+            </div>
+            <div class="flex w-full flex-col content-center gap-2 space-x-4 p-2">
+                @{
+                    var clauses = JsonConvert.DeserializeObject<List<string>>(Model.Clauses);
+                    if (clauses != null)
+                    {
+                        foreach (var c in clauses)
+                        {
+                            <div class="inline-flex w-full justify-evenly rounded bg-gray-700 p-0">
+                                <div class="inline-flex w-full rounded p-2">
+                                    <div class="mr-2 content-center hover:cursor-pointer">
                                         <a href="/Budget/Edit/@Model.Id/DeleteClause/@c">
-                                            <div>
-                                                X
-                                            </div>
+                                            <img class="size-6 invert-[100%]" src="~/img/icons/x-mark.svg">
                                         </a>
                                     </div>
-                                }
-                            }
+                                    <div class="">
+                                        @c
+                                    </div>
+                                </div>
+                            </div>
                         }
-                        
-                    </div>
-                </div>
-            </form>
+                    }
+                }
 
-            
-        } else
-        {
-            <div class="flex w-full flex-col content-center p-2">
-                <div class="flex w-full flex-row border-s-4 border-solid border-red-800 bg-gray-700 p-2 text-white">
-                    Budget Not Found
-                </div>
             </div>
-        }
+        </div>
     </div>
 </main>
 

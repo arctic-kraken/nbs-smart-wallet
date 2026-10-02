@@ -32,6 +32,16 @@
             </a>
             @if (User.IsInRole("Admin"))
             {
+                <a class="w-full" href="/auth">
+                    <div class="inline-flex w-full rounded p-2 hover:cursor-pointer hover:bg-gray-800">
+                        <div class="mr-2 content-center">
+                            <img class="size-6 invert-[100%]" src="~/img/icons/arrow-path.svg">
+                        </div>
+                        <div class="">
+                            Revolut Sync
+                        </div>
+                    </div>
+                </a>
                 <a class="w-full" asp-controller="Revolut" asp-action="Accounts">
                     <div class="inline-flex w-full rounded p-2 hover:cursor-pointer hover:bg-gray-800">
                         <div class="mr-2 content-center">
@@ -46,7 +56,7 @@
             <a class="w-full" asp-controller="Report" asp-action="AccountList">
                 <div class="inline-flex w-full rounded p-2 hover:cursor-pointer hover:bg-gray-800">
                     <div class="mr-2 content-center">
-                        <img class="size-6 invert-[100%]" src="~/img/icons/accounts.svg">
+                        <img class="size-6 invert-[100%]" src="~/img/icons/banknotes.svg">
                     </div>
                     <div class="">
                         Spendings
@@ -56,7 +66,7 @@
             <a class="w-full" asp-controller="Budget" asp-action="List">
                 <div class="inline-flex w-full rounded p-2 hover:cursor-pointer hover:bg-gray-800">
                     <div class="mr-2 content-center">
-                        <img class="size-6 invert-[100%]" src="~/img/icons/accounts.svg">
+                        <img class="size-6 invert-[100%]" src="~/img/icons/chart-pie.svg">
                     </div>
                     <div class="">
                         Budgets
