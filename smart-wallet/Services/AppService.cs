@@ -14,7 +14,7 @@ namespace nbs_smart_wallet.Services
 			_userManager = userManager;
 		}
 
-		public Guid WhoIsCurrentUser()
+		public virtual Guid WhoIsCurrentUser()
 		{
 			if (_accessor.HttpContext == null)
 				throw new ArgumentNullException($"{nameof(AppService)}: Called {nameof(WhoIsCurrentUser)} with null context");
