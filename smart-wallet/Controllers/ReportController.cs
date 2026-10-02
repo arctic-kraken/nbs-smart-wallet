@@ -23,6 +23,10 @@ namespace nbs_smart_wallet.Controllers
 		{
 			public List<ReportService.DailySpendings> Spendings { get; set; } = new List<ReportService.DailySpendings>();
 			public List<ReportService.BudgetSpendings> BudgetSpending { get; set; } = new List<ReportService.BudgetSpendings>();
+			public List<ReportService.BudgetSpendings> BudgetIncome { get; set; } = new List<ReportService.BudgetSpendings>();
+			public int selectedMonth { get; set; }
+			public int selectedYear { get; set; }
+			public int AccountId { get; set; }
 		}
 
 		[HttpGet]
@@ -32,7 +36,7 @@ namespace nbs_smart_wallet.Controllers
 		}
 
 		[HttpGet]
-		public IActionResult Spendings(int id)
+		public IActionResult Spendings(int id, int? month, int? year)
 		{
 			var model = new SpendingsModel();
 			var account = _revolut.GetAccount(id);
@@ -41,10 +45,26 @@ namespace nbs_smart_wallet.Controllers
 				return NotFound();
 			}
 
-			model.Spendings = _service.GetSpendingsFor(account.RevAccountId, DateTime.UtcNow.Month, DateTime.UtcNow.Year);
-			model.BudgetSpending = _service.GetBudgetSpendingFor(account.RevAccountId, DateTime.UtcNow.Month, DateTime.UtcNow.Year);
+			if ((month == null) || (month <= 0 || month > 12))
+				month = DateTime.UtcNow.Month;
+
+			if (year == null || (year < DateTime.MinValue.Year || year > DateTime.MaxValue.Year))
+				year = DateTime.UtcNow.Year;
+
+			model.selectedMonth = (int)month;
+			model.selectedYear = (int)year;
+			model.AccountId = id;
+			model.Spendings = _service.GetSpendingsFor(account.RevAccountId, (int)month, (int)year);
+			model.BudgetSpending = _service.GetBudgetSpendingFor(account.RevAccountId, (int)month, (int)year);
+			model.BudgetIncome = _service.GetBudgetIncomeFor(account.RevAccountId, (int)month, (int)year);
 			
 			return View(model);
+		}
+
+		[HttpPost]
+		public IActionResult Spendings(int id, SpendingsModel model)
+		{
+			return Spendings(id, model.selectedMonth, model.selectedYear);
 		}
 	}
 }

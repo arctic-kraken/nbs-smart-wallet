@@ -1,26 +1,65 @@
 ﻿@{
     var labels = Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Spendings.Select(x => x.BookingDate.ToString("dd")).ToList()));
     var data = Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Spendings.Select(x => x.Balance).ToList()));
-    var currentMonthName = DateTime.UtcNow.ToString("MMMM yyyy");
-    
+
     var budgetLables = Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.BudgetSpending.Select(x => x.BudgetName).ToList()));
     var budgetData = Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.BudgetSpending.Select(x => x.BudgetTotal).ToList()));
 
+    var incomeLables = Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.BudgetIncome.Select(x => x.BudgetName).ToList()));
+    var incomeData = Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.BudgetIncome.Select(x => x.BudgetTotal).ToList()));
+
+    var monthNames = new List<string>();
+    for (int i = 1; i <= 12; i++)
+        monthNames.Add(new DateTime(2000, i, 1).ToString("MMMM"));
 }
 @model nbs_smart_wallet.Controllers.ReportController.SpendingsModel;
 
 <div>
-    @currentMonthName
+    <form class="grid" asp-action="Spendings" asp-controller="Report" method="post" asp-route-id="@Model.AccountId">
+        <div class="row-span-2 grid w-full grid-rows-2 gap-1">
+            <div class="inline-flex w-full columns-2 gap-5">
+                <div class="content-center">
+                    <select class="rounded bg-gray-800 pt-[5px] pr-[10px] pb-[5px] pl-[10px]" asp-for="@Model.selectedMonth">
+                        @for (int i = 1; i <= 12; i++)
+                        {
+                            @if (i == Model.selectedMonth)
+                            {
+                                <option selected class="bg-gray-800" value="@i">@monthNames[i - 1]</option>
+                            }
+                            else
+                            {
+                                <option class="bg-gray-800" value="@i">@monthNames[i - 1]</option>
+                            }
+                        }
+                    </select>
+                </div>
+                <div class="content-center">
+                    <input class="flex w-[100px] rounded bg-white pr-[10px] pl-[10px] text-black" asp-for="@Model.selectedYear" type="number" placeholder="Year" value="@Model.selectedYear" />
+                </div>
+            </div>
+            <div class="flex justify-center">
+                <button class="max-w-fit rounded bg-white p-2 text-black hover:cursor-pointer" type="submit">
+                    Change Viewing Month
+                </button>
+            </div>
+        </div>
+    </form>
 </div>
 
-<div class="flex w-full p-2">
-    <div class="w-1/2 p-2">
-        <canvas id="myChart" class="w-full"></canvas>
+<div class="flex w-full flex-col p-2">
+    <div class="flex h-1/2 w-full flex-row">
+        <div class="w-1/2 content-center p-2">
+            <canvas id="myChart" class="w-full"></canvas>
+        </div>
+        <div class="w-1/2 content-center p-2">
+            <canvas id="budget_pie" class="w-full"></canvas>
+        </div>
     </div>
-    <div class="max-h-1/2 w-1/2 p-2">
-        <canvas id="budget_pie" class="w-full"></canvas>
+    <div class="flex h-1/2 w-full flex-row">
+        <div class="h-1/2 w-1/2 content-center p-2">
+            <canvas id="budget_pie_income" class="w-full"></canvas>
+        </div>
     </div>
-    
 </div>
 
 <script src="~/lib/Chart.js/chart.umd.min.js"></script>
@@ -35,6 +74,7 @@
     Chart.defaults.elements.line.showLine = true;
 
     const ctx2 = document.getElementById('budget_pie');
+    const ctx3 = document.getElementById('budget_pie_income');
 
     new Chart(ctx, {
         type: 'line',
@@ -67,6 +107,19 @@
             }]
         },
         
+    });
+
+    new Chart(ctx3, {
+        type: 'pie',
+        data: {
+            labels: @incomeLables,
+            datasets: [{
+                label: `Budget Income over the month`,
+                data: @incomeData,
+                borderWidth: 0,
+            }]
+        },
+
     });
 
 </script>

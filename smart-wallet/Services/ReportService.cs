@@ -57,7 +57,13 @@ namespace nbs_smart_wallet.Services
 			return spendings;
 		}
 
-		public List<BudgetSpendings> GetBudgetSpendingFor(Guid revAccountId, int month, int year)
+		public List<BudgetSpendings> GetBudgetIncomeFor(Guid revAccountId, int month, int year) =>
+			GetBudgetFiguresFor(revAccountId, month, year, AppConsts.CreditDebitIndicator.Debit);
+
+		public List<BudgetSpendings> GetBudgetSpendingFor(Guid revAccountId, int month, int year) =>
+			GetBudgetFiguresFor(revAccountId, month, year, AppConsts.CreditDebitIndicator.Credit);
+
+		public List<BudgetSpendings> GetBudgetFiguresFor(Guid revAccountId, int month, int year, string indicator)
 		{
 			var userId = _app.WhoIsCurrentUser();
 			var account = _db.RevAccounts.FirstOrDefault(x => x.AspNetUserId == userId && x.RevAccountId == revAccountId);
@@ -68,7 +74,7 @@ namespace nbs_smart_wallet.Services
 			var endOfMonth = new DateTime(year, month, 1).AddMonths(1).AddDays(-1);
 			var trxs = _db.RevTransactions
 				.Where(x => x.BookingDateTime.ToUniversalTime() >= startOfMonth && x.BookingDateTime.ToUniversalTime() <= endOfMonth 
-				&& x.RevAccountId == account.RevAccountId && x.CreditDebitIndicator == AppConsts.CreditDebitIndicator.Credit)
+				&& x.RevAccountId == account.RevAccountId && x.CreditDebitIndicator == indicator)
 				.OrderBy(x => x.BookingDateTime.ToUniversalTime())
 				.ToList();
 
