@@ -105,38 +105,14 @@ public class RevolutController : Controller
 		}
 	}
 
-	//[HttpGet]
-	//[Route("/accounts/get")]
-	//public async Task<ActionResult> GetAccounts()
-	//{
-	//	if (!_revolutProxy.IsLoggedIntoRevolut())
-	//		RedirectToAction("PleadForAuth");
-
-	//	try
-	//	{
-	//		var success = await _service.SyncAccounts();
- //           return Ok(success);
-	//	}
-	//	catch (Exception e)
-	//	{
-	//		Log.Error(e, e.Message);
- //           // middleware shows generic error 500 page on prod
-	//	}
-		
-	//	return Problem();
- //   }
-
 	[HttpGet]
 	[Route("/accounts/seed")]
 	public ActionResult SeedAccounts()
-	{
-        //if (!_revolutProxy.IsLoggedIntoRevolut())
-        //	RedirectToAction("PleadForAuth");
-        
+	{        
         try
 		{
-			//var response = _service.GetAccountsSeed();
-            _service.SeedRandomTransactions();
+			var response = _service.GetAccountsSeed();
+            //_service.SeedRandomTransactions();
             
 			return Ok();
 		}

@@ -17,56 +17,62 @@
 }
 @model nbs_smart_wallet.Controllers.ReportController.SpendingsModel;
 
-<div>
-    <form class="grid" asp-action="Spendings" asp-controller="Report" method="post" asp-route-id="@Model.AccountId">
-        <div class="row-span-2 grid w-full grid-rows-2 gap-1">
-            <div class="inline-flex w-full columns-2 gap-5">
-                <div class="content-center">
-                    <select class="rounded bg-gray-800 pt-[5px] pr-[10px] pb-[5px] pl-[10px]" asp-for="@Model.selectedMonth">
-                        @for (int i = 1; i <= 12; i++)
-                        {
-                            @if (i == Model.selectedMonth)
-                            {
-                                <option selected class="bg-gray-800" value="@i">@monthNames[i - 1]</option>
-                            }
-                            else
-                            {
-                                <option class="bg-gray-800" value="@i">@monthNames[i - 1]</option>
-                            }
-                        }
-                    </select>
+<main class="w-1/2"> 
+     <div class="">
+        <div class="">
+            <form class="grid" asp-action="Spendings" asp-controller="Report" method="post" asp-route-id="@Model.AccountId">
+                <div class="row-span-2 grid w-full grid-rows-2 gap-1">
+                    <div class="inline-flex w-full columns-2 justify-center gap-5">
+                        <div class="content-center">
+                            <select class="rounded bg-gray-800 pt-[5px] pr-[10px] pb-[5px] pl-[10px]" asp-for="@Model.selectedMonth">
+                                @for (int i = 1; i <= 12; i++)
+                                {
+                                    @if (i == Model.selectedMonth)
+                                    {
+                                        <option selected class="bg-gray-800" value="@i">@monthNames[i - 1]</option>
+                                    }
+                                    else
+                                    {
+                                        <option class="bg-gray-800" value="@i">@monthNames[i - 1]</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="content-center">
+                            <input class="flex w-[100px] rounded bg-white pr-[10px] pl-[10px] text-black" asp-for="@Model.selectedYear" type="number" placeholder="Year" value="@Model.selectedYear" />
+                        </div>
+                    </div>
+                    <div class="flex justify-center">
+                        <button class="max-w-fit rounded bg-white p-2 text-black hover:cursor-pointer" type="submit">
+                            Change Viewing Month
+                        </button>
+                    </div>
                 </div>
-                <div class="content-center">
-                    <input class="flex w-[100px] rounded bg-white pr-[10px] pl-[10px] text-black" asp-for="@Model.selectedYear" type="number" placeholder="Year" value="@Model.selectedYear" />
-                </div>
-            </div>
-            <div class="flex justify-center">
-                <button class="max-w-fit rounded bg-white p-2 text-black hover:cursor-pointer" type="submit">
-                    Change Viewing Month
-                </button>
-            </div>
+            </form>
         </div>
-    </form>
-</div>
 
-<div class="flex w-full flex-col p-2">
-    <div class="flex h-1/2 w-full flex-row">
-        <div class="w-1/2 content-center p-2">
-            <canvas id="myChart" class="w-full"></canvas>
+        <div class="flex h-full flex-col p-2">
+            <div class="flex max-h-1/2 flex-row">
+                <div class="w-1/2 content-center p-2">
+                    <canvas id="myChart" class="w-full"></canvas>
+                </div>
+                <div class="w-1/2 content-center p-2">
+                    <canvas id="budget_pie" class="w-full justify-self-center"></canvas>
+                </div>
+            </div>
+            <div class="flex max-h-1/2 flex-row">
+                <div class="h-1/2 w-1/2 content-center p-2">
+                    <canvas id="budget_pie_income" class="w-full justify-self-center"></canvas>
+                </div>
+                <div class="w-1/2 content-center p-2">
+                    <canvas id="creditsdebits" class="w-full"></canvas>
+                </div>
+            </div>
         </div>
-        <div class="w-1/2 content-center p-2">
-            <canvas id="budget_pie" class="w-full"></canvas>
-        </div>
-    </div>
-    <div class="flex h-1/2 w-full flex-row">
-        <div class="h-1/2 w-1/2 content-center p-2">
-            <canvas id="budget_pie_income" class="w-full"></canvas>
-        </div>
-        <div class="w-1/2 content-center p-2">
-            <canvas id="creditsdebits" class="w-full"></canvas>
-        </div>
-    </div>
-</div>
+     </div> 
+    
+</main>
+
 
 <script src="~/lib/Chart.js/chart.umd.min.js"></script>
 
