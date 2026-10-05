@@ -109,20 +109,20 @@ public class RevolutController : Controller
 		var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 		Log.Information("Serving Accounts page for {ip}", requestIp);
 
-		if (!_revolutProxy.IsLoggedIntoRevolut())
-        {
-			Log.Information("Pleading {ip} to re-auth with Revolut", requestIp);
-			return RedirectToAction("PleadForAuth");
-		}
+		//if (!_revolutProxy.IsLoggedIntoRevolut())
+  //      {
+		//	Log.Information("Pleading {ip} to re-auth with Revolut", requestIp);
+		//	return RedirectToAction("PleadForAuth");
+		//}
         
         try
         {
-			Log.Information("Syncing Revolut Accounts of {ip}", requestIp);
-			var result = await _service.SyncAccounts();
-			if (result)
-				Log.Information("Successful sync of Revolut Accounts for {ip}", requestIp);
-			else
-				Log.Warning("Failed to sync Revolut Accounts for {ip}", requestIp);
+			//Log.Information("Syncing Revolut Accounts of {ip}", requestIp);
+			//var result = await _service.SyncAccounts();
+			//if (result)
+			//	Log.Information("Successful sync of Revolut Accounts for {ip}", requestIp);
+			//else
+			//	Log.Warning("Failed to sync Revolut Accounts for {ip}", requestIp);
 
 			Log.Information("Getting Accounts for {ip}", requestIp);
 			var accounts = _service.GetAccounts();
@@ -188,20 +188,20 @@ public class RevolutController : Controller
 		var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 		Log.Information("Serving Account Details page for {ip}", requestIp);
 
-		if (!_revolutProxy.IsLoggedIntoRevolut())
-		{
-			Log.Information("Pleading {ip} to re-auth with Revolut", requestIp);
-			return RedirectToAction("PleadForAuth");
-		}
+		//if (!_revolutProxy.IsLoggedIntoRevolut())
+		//{
+		//	Log.Information("Pleading {ip} to re-auth with Revolut", requestIp);
+		//	return RedirectToAction("PleadForAuth");
+		//}
 
 		try
 		{
-			Log.Information("Syncing Revolut Transactions of {ip}", requestIp);
-			var result = await _service.SyncTransactionsOf(id);
-			if (result)
-				Log.Information("Successful sync of Revolut Transactions for {ip}", requestIp);
-			else
-				Log.Warning("Failed to sync Revolut Transactions for {ip}", requestIp);
+			//Log.Information("Syncing Revolut Transactions of {ip}", requestIp);
+			//var result = await _service.SyncTransactionsOf(id);
+			//if (result)
+			//	Log.Information("Successful sync of Revolut Transactions for {ip}", requestIp);
+			//else
+			//	Log.Warning("Failed to sync Revolut Transactions for {ip}", requestIp);
 
 			Log.Information("Getting Bank Accounts and Transactions for {ip}", requestIp);
 			var model = new AccountDetailsEditModel();
