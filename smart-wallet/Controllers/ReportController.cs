@@ -29,7 +29,7 @@ namespace nbs_smart_wallet.Controllers
 		[HttpGet]
 		public IActionResult AccountList()
 		{
-			var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+			var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 			Log.Information("Serving Reports Account List page for {ip}", requestIp);
 
 			return View(_revolut.GetAccounts());
@@ -38,7 +38,7 @@ namespace nbs_smart_wallet.Controllers
 		[HttpGet]
 		public IActionResult Spendings(int id, int? month, int? year)
 		{
-			var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+			var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 			try
 			{
 				Log.Information("Serving Spendings page for {ip}", requestIp);
@@ -78,7 +78,7 @@ namespace nbs_smart_wallet.Controllers
 		[HttpPost]
 		public IActionResult Spendings(int id, SpendingsModel model)
 		{
-			var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+			var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 			Log.Information("Changed viewing month, {ip} redirected to Get Spendings endpoint", requestIp);
 
 			return Spendings(id, model.selectedMonth, model.selectedYear);

@@ -33,7 +33,7 @@ public class RevolutController : Controller
     [AllowAnonymous]
     public ActionResult jwk()
     {
-		var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+		var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 		try
         {
             Log.Information("JWK endpoint reached by {ip}", requestIp);
@@ -58,7 +58,7 @@ public class RevolutController : Controller
     [Route("/auth")]
     public async Task<ActionResult> Auth()
     {
-		var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+		var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 		Log.Information("Authentication begun for {ip}", requestIp);
         var client_creds = await _revolutProxy.GetClientCredentialToken();
         var account_consent = await _revolutProxy.CreateAccountAccessConsent();
@@ -72,7 +72,7 @@ public class RevolutController : Controller
     [AllowAnonymous]
     public async Task<ActionResult> redirect_target(string code, string id_token, string state)
     {
-		var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+		var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 		Log.Information("Successful callback, getting access token");
         // code is only valid for 2 mins
         // get access token now
@@ -88,7 +88,7 @@ public class RevolutController : Controller
 
     public IActionResult AuthSuccess()
     {
-		var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+		var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 		Log.Information("Serving AuthSuccess page for {ip}", requestIp);
 
 		return View();
@@ -96,7 +96,7 @@ public class RevolutController : Controller
 
     public IActionResult PleadForAuth()
     {
-		var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+		var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 		Log.Information("Serving PleadForAuth page for {ip}", requestIp);
 
 		return View();
@@ -106,7 +106,7 @@ public class RevolutController : Controller
 	[Route("/accounts")]
 	public async Task<ActionResult> Accounts()
 	{
-		var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+		var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 		Log.Information("Serving Accounts page for {ip}", requestIp);
 
 		if (!_revolutProxy.IsLoggedIntoRevolut())
@@ -161,7 +161,7 @@ public class RevolutController : Controller
 	[HttpGet]
     public ActionResult SyncDetails()
     {
-		var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+		var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 		try
 		{
 			Log.Information("Processing Sync of Details for {ip}", requestIp);
@@ -185,7 +185,7 @@ public class RevolutController : Controller
 	[HttpGet]
     public async Task<ActionResult> AccountDetails(Guid id)
     {
-		var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+		var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 		Log.Information("Serving Account Details page for {ip}", requestIp);
 
 		if (!_revolutProxy.IsLoggedIntoRevolut())

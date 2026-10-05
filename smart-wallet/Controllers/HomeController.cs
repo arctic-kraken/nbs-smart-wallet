@@ -26,7 +26,7 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-		var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+		var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 		Log.Information("Serving Home/Index page for {ip}", requestIp);
 		return View();
     }
@@ -34,7 +34,7 @@ public class HomeController : Controller
     [AllowAnonymous]
     public IActionResult Landing(string infoMessages)
     {
-		var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+		var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 		Log.Information("Serving public Landing page for {ip}", requestIp);
 
 		return View();
@@ -43,7 +43,7 @@ public class HomeController : Controller
     [AllowAnonymous]
     public IActionResult Register()
     {
-		var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+		var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 		Log.Information("Serving public Register page for {ip}", requestIp);
 		return View();
     }
@@ -51,7 +51,7 @@ public class HomeController : Controller
 	[HttpGet]
 	public IActionResult LogOut()
 	{
-		var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+		var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 		Log.Information("Serving LogOut page for {ip}", requestIp);
 		return View();
 	}
@@ -59,7 +59,7 @@ public class HomeController : Controller
 	[HttpPost]
 	public async Task<ActionResult> LogOutConfirm()
 	{
-		var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+		var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 		try
 		{
 			Log.Information("LogOut request begun for {ip}", requestIp);
@@ -78,8 +78,8 @@ public class HomeController : Controller
     [AllowAnonymous]
 	public async Task<ActionResult> Register(Register request)
 	{
-        var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
-        try
+		var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+		try
         {
 			Log.Information("Registration request begun processing for {ip}", requestIp);
 
@@ -152,7 +152,7 @@ public class HomeController : Controller
     [AllowAnonymous]
     public async Task<ActionResult> Login(Login request)
     {
-		var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+		var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 		try
 		{
 			Log.Information("Login request begun processing for {ip}", requestIp);

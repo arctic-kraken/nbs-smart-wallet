@@ -16,7 +16,7 @@ namespace nbs_smart_wallet.Controllers
 
 		public IActionResult List()
 		{
-			var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+			var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 			try
 			{
 				Log.Information("Serving Budget List for {ip}", requestIp);
@@ -35,7 +35,7 @@ namespace nbs_smart_wallet.Controllers
 		[HttpGet]
 		public IActionResult Edit(int? id)
 		{
-			var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+			var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 			try
 			{
 				Log.Information("Serving Budget page for {ip}", requestIp);
@@ -60,7 +60,7 @@ namespace nbs_smart_wallet.Controllers
 		[HttpPost]
 		public IActionResult Edit(int id, Budget modified)
 		{
-			var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+			var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 			try
 			{
 				Log.Information("Posting changes for Budget for {ip}, id: {id}", requestIp, id);
@@ -85,7 +85,7 @@ namespace nbs_smart_wallet.Controllers
 		[Route("/Budget/Edit/{id}/AddClause/{clause}")]
 		public IActionResult AddClause(int id, string clause)
 		{
-			var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+			var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 			try
 			{
 				Log.Information("Adding clause for Budget for {ip}, id: {id}", requestIp, id);
@@ -113,7 +113,7 @@ namespace nbs_smart_wallet.Controllers
 		[Authorize(Roles = "Admin")]
 		public IActionResult DeleteClause(int id, string clause)
 		{
-			var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+			var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 			try
 			{
 				Log.Information("Deleting clause from Budget for {ip}, id: {id}", requestIp, id);
@@ -140,7 +140,7 @@ namespace nbs_smart_wallet.Controllers
 		[Authorize(Roles = "Admin")]
 		public IActionResult Delete(int id)
 		{
-			var requestIp = HttpContext.Request.HttpContext?.Connection.RemoteIpAddress?.ToString();
+			var requestIp = HttpContext?.Request?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 			try
 			{
 				Log.Information("Deleting Budget for {ip}, id: {id}", requestIp, id);
