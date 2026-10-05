@@ -51,7 +51,8 @@ namespace nbs_smart_wallet.Services
 			var cert = X509CertificateLoader.LoadPkcs12(
 				pfxBytes,
 				null,
-				keyStorageFlags: X509KeyStorageFlags.MachineKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable | X509KeyStorageFlags.UserKeySet
+				keyStorageFlags: X509KeyStorageFlags.MachineKeySet,
+				loaderLimits: Pkcs12LoaderLimits.DangerousNoLimits
 			);
 			return cert;
 		}
