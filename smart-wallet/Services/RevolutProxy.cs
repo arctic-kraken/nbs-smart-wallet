@@ -47,6 +47,7 @@ namespace nbs_smart_wallet.Services
 		// netcore is retarded, turns out I have to turn the pem and pk into pfx and load that one for it to auth
 		private static X509Certificate2 GetSigningCertificateWith(string contents)
 		{
+			Log.Warning("CONTENTS {pfx}", contents);
 			var pfxBytes = Convert.FromBase64String(contents);
 			var cert = X509CertificateLoader.LoadPkcs12(
 				pfxBytes,
