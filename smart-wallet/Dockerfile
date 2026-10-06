@@ -15,4 +15,9 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 COPY --from=build-env /app/out .
 
-ENTRYPOINT ["dotnet", "smart-wallet.dll"]
+COPY --from=build-env smart-wallet/startup.sh /startup.sh
+
+RUN chmod +x /startup.sh
+
+ENTRYPOINT ["/startup.sh"]
+CMD ["dotnet", "smart-wallet.dll"]
