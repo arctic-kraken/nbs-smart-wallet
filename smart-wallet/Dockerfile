@@ -15,7 +15,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 COPY --from=build-env /app/out .
 
-COPY --from=build-env smart-wallet/startup.sh /startup.sh
+COPY smart-wallet/startup.sh /startup.sh
 
 RUN chmod +x /startup.sh
 
